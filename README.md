@@ -1,5 +1,10 @@
 [![Build Status](https://travis-ci.org/B2W-BIT/restQL-manager.svg?branch=new-routes)](https://travis-ci.org/B2W-BIT/restQL-manager)
 
+Talk with other restQL users in our Telegram groups:
+
+* [@restQL](https://t.me/restQL): restQL Telegram Group
+* [@restQLBR](https://t.me/restQLBR): Brazilian restQL Telegram Group
+
 ## Running restQL Manager
 
 restQL Manager allows you to easily develop and test new queries, save resources endpoints, check resources status and save queries that can be used by clients just referencing the query's name.
