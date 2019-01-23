@@ -1,5 +1,4 @@
 const url = require("url");
-
 const fetch = require("cross-fetch");
 
 const RESTQL_SERVER_URL =
@@ -9,7 +8,11 @@ const RESTQL_HEADERS = {
   Accept: "application/json"
 };
 
-function runQuery(queryText, params) {
+function mergeHeaders(reqHeaders, defaultHeaders) {
+  return Object.assign({}, reqHeaders, defaultHeaders);
+}
+
+function runQuery(queryText, params, requestHeaders) {
   return fetch(
     RESTQL_SERVER_URL +
       "/run-query" +
@@ -18,7 +21,7 @@ function runQuery(queryText, params) {
       }),
     {
       method: "POST",
-      headers: RESTQL_HEADERS,
+      headers: mergeHeaders(requestHeaders, RESTQL_HEADERS),
       body: queryText
     }
   )
@@ -33,7 +36,7 @@ function runQuery(queryText, params) {
     });
 }
 
-function runNamedQuery(namespace, name, revision, params) {
+function runNamedQuery(namespace, name, revision, params, requestHeaders) {
   return fetch(
     RESTQL_SERVER_URL +
       "/run-query/" +
@@ -46,7 +49,7 @@ function runNamedQuery(namespace, name, revision, params) {
         query: params
       }),
     {
-      headers: RESTQL_HEADERS
+      headers: mergeHeaders(requestHeaders, RESTQL_HEADERS)
     }
   )
     .then(response => {
