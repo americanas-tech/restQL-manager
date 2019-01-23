@@ -45,6 +45,25 @@ describe("runQuery", () => {
 
     expect(response).toHaveProperty("message");
   });
+  test("should make request with merged headers", async () => {
+    const server = nock("http://localhost:9000", {
+      reqheaders: {
+        "Content-Type": "text/plain",
+        Accept: "application/json",
+        "accept-encoding": "gzip,deflate",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        connection: "close",
+        "content-length": 10
+      }
+    })
+      .post("/run-query", "from cards")
+      .reply(200, {
+        cards: {}
+      });
+    const response = await queryRunner.runQuery("from cards");
+
+    expect(response).toHaveProperty("cards");
+  });
 });
 
 describe("runNamedQuery", () => {
@@ -105,5 +124,28 @@ describe("runNamedQuery", () => {
     );
 
     expect(response).toHaveProperty("message");
+  });
+
+  test("should return query result", async () => {
+    const server = nock("http://localhost:9000", {
+      reqheaders: {
+        "Content-Type": "text/plain",
+        Accept: "application/json",
+        "accept-encoding": "gzip,deflate",
+        "user-agent": "node-fetch/1.0 (+https://github.com/bitinn/node-fetch)",
+        connection: "close"
+      }
+    })
+      .get("/run-query/my-namespace/my-query/1")
+      .reply(200, {
+        cards: {}
+      });
+    const response = await queryRunner.runNamedQuery(
+      "my-namespace",
+      "my-query",
+      "1"
+    );
+
+    expect(response).toHaveProperty("cards");
   });
 });

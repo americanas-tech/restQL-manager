@@ -18,10 +18,10 @@ before_script:
 
 install:
   - npm install -g codecov
-  - yarn install
+  - npm i
 
 script:
-  - yarn test -- --coverage
+  - npm run test -- --coverage --forceExit
 
 after_success:
   - codecov
