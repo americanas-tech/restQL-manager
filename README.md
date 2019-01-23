@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/B2W-BIT/restQL-manager.svg?branch=new-routes)](https://travis-ci.org/B2W-BIT/restQL-manager)
+[![Build Status](https://travis-ci.org/B2W-BIT/restQL-manager.svg?branch=master)](https://travis-ci.org/B2W-BIT/restQL-manager)
 
 ## Running restQL Manager
 
