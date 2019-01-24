@@ -1,5 +1,5 @@
 {
-  "name": "restql-manager",
+  "name": "@b2wdigital/restql-manager",
   "version": "0.1.3",
   "dependencies": {
     "@types/react-sidebar": "^2.2.2",
