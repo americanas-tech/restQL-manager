@@ -56,9 +56,11 @@ function runNamedQuery(namespace, name, revision, params, requestHeaders) {
       return response.json();
     })
     .then(json => {
+      console.log("json", json);
       return json;
     })
     .catch(error => {
+      console.log("error", error);
       return error;
     });
 }

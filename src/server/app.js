@@ -42,7 +42,7 @@ app.post("/resources/:tenant/update", (req, res) => {
 });
 
 app.post("/run-query", (req, res) => {
-  runQuery(req.body.query, req.query).then(json => {
+  runQuery(req.body.query, req.query, req.headers).then(json => {
     res.json(json);
   });
 });
@@ -52,7 +52,8 @@ app.get("/run-query/:namespace/:name/:revision", (req, res) => {
     req.params.namespace,
     req.params.name,
     req.params.revision,
-    req.query
+    req.query,
+    req.headers
   ).then(json => {
     res.json(json);
   });
