@@ -1,6 +1,6 @@
 {
   "name": "@b2wdigital/restql-manager",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "dependencies": {
     "@types/react-sidebar": "^2.2.2",
     "body-parser": "^1.18.2",
