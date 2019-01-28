@@ -1,32 +1,38 @@
 .navbar {
-    margin-bottom: 0px;
-    background-color: #fff;
+  margin-bottom: 0px;
+  background-color: #fff;
 }
 
-.navbar img, .navbar object {
-    margin: 0px;
-    padding: 10px;
+.navbar img,
+.navbar object {
+  margin: 0px;
+  padding: 10px;
 }
 
 .logo {
-    margin: 0px;
-    padding: 10px;
-    width: auto;
-    height: 80px;
+  margin: 0px;
+  padding: 10px;
+  width: auto;
+  height: 80px;
 }
 
 .navbar .btn {
-    margin-left: 4px;
+  margin-left: 4px;
 }
-
 
 .queryTitle {
   position: relative;
 }
 
+.queryTitle h3 {
+  max-width: 490px;
+  display: inline-block;
+}
+
 .revisionPicker {
   position: absolute;
   right: 0;
+  margin-top: 20px;
   margin-left: 25px;
   padding: 0 6px;
   font-size: 18px;
@@ -34,27 +40,26 @@
 }
 
 .queryCol .options {
-    text-align: left;
+  text-align: left;
 }
 
 .queryCol .btn {
-    text-align: center;
-    margin-top: 6px;
-    margin-right: 4px;
+  text-align: center;
+  margin-top: 6px;
+  margin-right: 4px;
 }
-
 
 .CodeMirror {
-    height: 500px;
-    border: 1px solid #e0e0e0;
+  height: 500px;
+  border: 1px solid #e0e0e0;
 }
 
-.queryInput > .CodeMirror{
+.queryInput > .CodeMirror {
   height: 350px;
   margin-bottom: 20px;
 }
 
-.queryResult > .CodeMirror{
+.queryResult > .CodeMirror {
   height: 500px;
   margin-bottom: 20px;
 }
@@ -62,8 +67,6 @@
 .queryCol .form-control {
   margin-bottom: 8px;
 }
-
-
 
 /* Sidemenu query menu */
 .menu {
@@ -75,13 +78,12 @@
   cursor: pointer;
 }
 
-
 .menu ul {
   list-style: none;
   margin: 0;
   padding: 0;
   margin-top: 20px;
-  background-color: #00175B;
+  background-color: #00175b;
   border-radius: 5px;
 }
 
@@ -113,8 +115,8 @@
 }
 
 .menu ul li > ul li a {
-    font-weight: normal;
-    color: #fff;
+  font-weight: normal;
+  color: #fff;
 }
 
 /* Resources styling */

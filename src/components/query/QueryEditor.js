@@ -70,17 +70,20 @@ export default class QueryEditor extends Component {
         <Col sm={12} md={6} className="queryCol">
           <div className="queryTitle">
             <h3>
-              Query
-              {this.props.shouldLoadRevisions ? (
-                this.props.loadRevisions()
-              ) : (
-                <RevisionCombo
-                  toggle={this.props.revisions.length > 0}
-                  revisions={this.props.revisions}
-                  handleLoadQueryRevision={this.props.handleLoadQueryRevision}
-                />
-              )}
+              Query{" "}
+              {this.props.queryName
+                ? `- ${this.props.namespace}/${this.props.queryName}`
+                : ""}
             </h3>
+            {this.props.shouldLoadRevisions ? (
+              this.props.loadRevisions()
+            ) : (
+              <RevisionCombo
+                toggle={this.props.revisions.length > 0}
+                revisions={this.props.revisions}
+                handleLoadQueryRevision={this.props.handleLoadQueryRevision}
+              />
+            )}
           </div>
 
           <CodeMirror
