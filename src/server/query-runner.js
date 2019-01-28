@@ -1,5 +1,5 @@
 const url = require("url");
-const fetch = require("cross-fetch");
+const fetch = require("node-fetch");
 
 const RESTQL_SERVER_URL =
   process.env.RESTQL_SERVER_URL || "http://localhost:9000";
@@ -14,11 +14,7 @@ function mergeHeaders(reqHeaders, defaultHeaders) {
 
 function runQuery(queryText, params, requestHeaders) {
   return fetch(
-    RESTQL_SERVER_URL +
-      "/run-query" +
-      url.format({
-        query: params
-      }),
+    RESTQL_SERVER_URL + "/run-query" + url.format({ query: params }),
     {
       method: "POST",
       headers: mergeHeaders(requestHeaders, RESTQL_HEADERS),

@@ -1,5 +1,5 @@
 "use strict";
-const { fetch } = require("cross-fetch");
+const { fetch } = require("node-fetch");
 const URL = require("url");
 const models = require("./models");
 

@@ -1,5 +1,5 @@
 // This makes requests to restQL manager API
-const fetch = require("cross-fetch");
+const fetch = require("isomorphic-fetch");
 
 const RESTQL_SERVER_HEADERS = {
   "Content-type": "application/json",
