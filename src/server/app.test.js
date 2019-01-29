@@ -114,7 +114,19 @@ describe("/run-query", () => {
 
     expect(response.statusCode).toBe(200);
     expect(runQuery).toHaveBeenCalledTimes(1);
-    expect(runQuery).toBeCalledWith("from planets", {});
+    expect(runQuery).toBeCalledWith(
+      "from planets",
+      {},
+      {
+        accept: "application/json",
+        "accept-encoding": "gzip, deflate",
+        connection: "close",
+        "content-length": "24",
+        "content-type": "application/json",
+        host: response.request.host,
+        "user-agent": "node-superagent/3.8.0"
+      }
+    );
     expect(response.body).toEqual({ success: true });
   });
 
@@ -134,7 +146,19 @@ describe("/run-query", () => {
 
     expect(response.statusCode).toBe(200);
     expect(runQuery).toHaveBeenCalledTimes(1);
-    expect(runQuery).toBeCalledWith("from cards", { id: "123" });
+    expect(runQuery).toBeCalledWith(
+      "from cards",
+      { id: "123" },
+      {
+        accept: "application/json",
+        "accept-encoding": "gzip, deflate",
+        connection: "close",
+        "content-length": "22",
+        "content-type": "application/json",
+        host: response.request.host,
+        "user-agent": "node-superagent/3.8.0"
+      }
+    );
     expect(response.body).toEqual({ success: true });
   });
 });
@@ -152,11 +176,26 @@ describe("/run-query/:namespace/:name/:revision", () => {
     const response = await request(app)
       .get("/run-query/namespace/query/1")
       .set("Content-Type", "application/json")
-      .set("Accept", "application/json");
+      .set("Accept", "application/json")
+      .set("headers", { host: "127.0.0.1:12345" });
 
     expect(response.statusCode).toBe(200);
     expect(runNamedQuery).toHaveBeenCalledTimes(1);
-    expect(runNamedQuery).toBeCalledWith("namespace", "query", "1", {});
+    expect(runNamedQuery).toBeCalledWith(
+      "namespace",
+      "query",
+      "1",
+      {},
+      {
+        accept: "application/json",
+        "accept-encoding": "gzip, deflate",
+        connection: "close",
+        "content-type": "application/json",
+        headers: "[object Object]",
+        host: response.request.host,
+        "user-agent": "node-superagent/3.8.0"
+      }
+    );
     expect(response.body).toEqual({ success: true });
   });
 
@@ -173,9 +212,20 @@ describe("/run-query/:namespace/:name/:revision", () => {
 
     expect(response.statusCode).toBe(200);
     expect(runNamedQuery).toHaveBeenCalledTimes(1);
-    expect(runNamedQuery).toBeCalledWith("namespace", "query", "1", {
-      param: "param"
-    });
+    expect(runNamedQuery).toBeCalledWith(
+      "namespace",
+      "query",
+      "1",
+      { param: "param" },
+      {
+        accept: "application/json",
+        "accept-encoding": "gzip, deflate",
+        connection: "close",
+        "content-type": "application/json",
+        host: response.request.host,
+        "user-agent": "node-superagent/3.8.0"
+      }
+    );
     expect(response.body).toEqual({ success: true });
   });
 });
