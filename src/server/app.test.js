@@ -124,7 +124,7 @@ describe("/run-query", () => {
         "content-length": "24",
         "content-type": "application/json",
         host: response.request.host,
-        "user-agent": "node-superagent/3.8.0"
+        "user-agent": "node-superagent/3.8.3"
       }
     );
     expect(response.body).toEqual({ success: true });
@@ -156,7 +156,7 @@ describe("/run-query", () => {
         "content-length": "22",
         "content-type": "application/json",
         host: response.request.host,
-        "user-agent": "node-superagent/3.8.0"
+        "user-agent": "node-superagent/3.8.3"
       }
     );
     expect(response.body).toEqual({ success: true });
@@ -193,7 +193,7 @@ describe("/run-query/:namespace/:name/:revision", () => {
         "content-type": "application/json",
         headers: "[object Object]",
         host: response.request.host,
-        "user-agent": "node-superagent/3.8.0"
+        "user-agent": "node-superagent/3.8.3"
       }
     );
     expect(response.body).toEqual({ success: true });
@@ -223,7 +223,7 @@ describe("/run-query/:namespace/:name/:revision", () => {
         connection: "close",
         "content-type": "application/json",
         host: response.request.host,
-        "user-agent": "node-superagent/3.8.0"
+        "user-agent": "node-superagent/3.8.3"
       }
     );
     expect(response.body).toEqual({ success: true });
