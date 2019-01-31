@@ -1,11 +1,16 @@
 .resourcesMenu {
-    padding: 15px;
+  padding: 15px;
+}
+
+.navbar-brand {
+  display: inline-block;
+  width: 100px;
 }
 
 .btn-xs {
-    margin-left: 5px;
+  margin-left: 5px;
 }
 
 .btn-separator {
-    margin-bottom: 12px;
+  margin-bottom: 12px;
 }

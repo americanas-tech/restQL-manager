@@ -3,6 +3,11 @@
   background-color: #fff;
 }
 
+.navbar-brand {
+  display: inline-block;
+  width: 100px;
+}
+
 .navbar img,
 .navbar object {
   margin: 0px;
