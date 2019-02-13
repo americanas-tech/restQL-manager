@@ -120,6 +120,11 @@ function loadNamespaces() {
         $group: {
           _id: "$namespace"
         }
+      },
+      {
+        $sort: {
+          _id: 1
+        }
       }
     ])
     .then(namespaces => {
@@ -132,9 +137,13 @@ function loadNamespaces() {
 
 function loadQueries(namespace) {
   return models.Query
-    .find({
-      namespace: namespace
-    })
+    .find(
+      {
+        namespace: namespace
+      },
+      [],
+      { sort: { name: 1 } }
+    )
     .then(queries => {
       return Array.from(queries, buildQuery);
     })
