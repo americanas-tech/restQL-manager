@@ -56,10 +56,7 @@ export default class QuerySidebar extends Component {
 
   renderNamespaces = () => {
     if (!this.props.loadingNamespaces) {
-      let sortedNamespaces = this.props.namespaces.sort(function (a, b) {
-        return a._id.toLowerCase().localeCompare(b._id.toLowerCase());
-      })
-      let namespaces = sortedNamespaces.map((val, index) => {
+      let namespaces = this.props.namespaces.map((val, index) => {
         if (val._id !== null && val._id.trim() !== '')
           return (
             <li key={index}>
