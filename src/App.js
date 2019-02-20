@@ -20,6 +20,7 @@ class App extends Component {
         <Router>
           <div>
             <Route path="/" exact={true} component={QueryEditorScreen} />
+            <Route path="/query/:namespace/:queryName/:revision?" component={QueryEditorScreen}/>
             <Route path="/resources-editor" exact={true} component={ResourcesEditorScreen} />
           </div>
         </Router>

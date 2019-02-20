@@ -10,7 +10,7 @@ export default class ResourcesNavbar extends Component {
       <Navbar>
         <Navbar.Header>
           <Navbar.Brand>
-            <Link to={"/"}>
+            <Link to={"/"} onClick={this.props.newQuery}>
               <ReactSVG src={this.props.logo} alt="Logo" />
             </Link>
           </Navbar.Brand>
@@ -21,6 +21,7 @@ export default class ResourcesNavbar extends Component {
             <FormGroup controlId="formInlineName">
               <Link
                 to={this.props.queryEditorLink}
+                onClick={this.props.newQuery}
                 className="btn btn-md btn-info"
               >
                 Query Editor
