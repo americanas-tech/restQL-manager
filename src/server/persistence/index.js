@@ -142,7 +142,7 @@ function loadQueries(namespace) {
         namespace: namespace
       },
       [],
-      { sort: { name: 1 } }
+      {}
     )
     .then(queries => {
       return Array.from(queries, buildQuery);
