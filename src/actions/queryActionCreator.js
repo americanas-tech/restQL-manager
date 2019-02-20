@@ -160,7 +160,7 @@ export function handleLoadNamespaces() {
       dispatch({ type: QUERY_ACTIONS.NAMESPACES_LOADED, value: [] });
       alert("Error loading namespaces: " + error);
     } else {
-      dispatch({ type: QUERY_ACTIONS.NAMESPACES_LOADED, value: response });
+      dispatch({ type: QUERY_ACTIONS.NAMESPACES_LOADED, value: response.sort(function (a, b) { return a._id.toLowerCase().localeCompare(b._id.toLowerCase()) })});
     }
   });
 }
