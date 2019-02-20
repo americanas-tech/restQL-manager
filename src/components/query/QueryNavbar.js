@@ -10,7 +10,7 @@ export default class QueryNavbar extends Component {
       <Navbar>
         <Navbar.Header>
           <Navbar.Brand>
-            <Link to={"/"}>
+            <Link to={"/"} onClick={this.props.newQuery}>
               <ReactSVG src={this.props.logo} alt="Logo" />
             </Link>
           </Navbar.Brand>
@@ -22,9 +22,11 @@ export default class QueryNavbar extends Component {
               <Button bsStyle="default" onClick={this.props.toggleSidebar}>
                 Queries
               </Button>
-              <Button bsStyle="danger" onClick={this.props.newQuery}>
-                New Query
-              </Button>
+              <Link to={"/"}>
+                <Button bsStyle="danger" onClick={this.props.newQuery}>
+                  New Query
+                </Button>
+              </Link>
             </FormGroup>
           </Navbar.Form>
         </Navbar.Collapse>

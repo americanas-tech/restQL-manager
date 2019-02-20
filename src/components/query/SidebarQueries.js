@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import { Collapse } from 'react-bootstrap';
 
+import { Link } from "react-router-dom";
 
 export default class SidebarQueries extends Component {
 
@@ -10,7 +11,7 @@ export default class SidebarQueries extends Component {
       return this.props.queries.map((val, index) => {
         return (
           <li key={index}>
-            <a onClick={this.props.loadQuery.bind(this, val)}>{val.id}</a>
+            <Link to={`/query/${this.props.namespace}/${val.id}`} >{val.id}</Link>
           </li>
         );
       });
@@ -22,7 +23,6 @@ export default class SidebarQueries extends Component {
 
   render() {
     const shouldCollapse = this.props.namespace === this.props.collapsedNamespace && !this.props.loadingQueries;
-
     return (
       <ul className="queries">
         <Collapse in={shouldCollapse}>

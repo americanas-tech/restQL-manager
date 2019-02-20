@@ -19,18 +19,19 @@ import {
 
   // Business logic operations
   handleLoadNamespaces,
-  handleLoadQueries,
-  handleLoadQuery,
   handleRunQuery,
   handleSaveQuery,
   handleLoadRevisions,
-  handleLoadQueryRevision
+  handleRedirectToQuery,
+  handleLoadQueryFromURL,
 } from "../../actions/queryActionCreator";
 
 import {
   handleLoadTenants,
   handleSetTenant
 } from "../../actions/environmentActionCreator";
+
+import { handleSidebarLoadQueries, handleSidebarLoadQuery } from "../../actions/sidebarActionCreator";
 
 // CSS for this screen and logo
 import "./QueryEditorScreen.css";
@@ -41,6 +42,10 @@ import QueryNavbar from "./QueryNavbar";
 import QuerySidebar from "./QuerySidebar";
 import QueryEditor from "./QueryEditor";
 
+function shouldUpdate(prevProps, nextProps) {
+  return (prevProps.namespace !== nextProps.namespace || prevProps.queryName !== nextProps.queryName || prevProps.revisionNumber !== nextProps.revision) && (nextProps.queryName !== undefined)
+}
+
 class QueryEditorScreen extends Component {
   constructor(props) {
     super(props);
@@ -48,6 +53,22 @@ class QueryEditorScreen extends Component {
 
     if (this.props.tenants.length === 0) handleLoadTenants();
   }
+
+  componentDidMount() {
+    if (Object.keys(this.props.match.params).length > 0) {
+      handleLoadQueryFromURL(this.props.match.params)
+    };
+  }
+
+  componentDidUpdate(prevProps) {
+
+    const nextProps = {namespace: this.props.match.params.namespace,
+                       queryName: this.props.match.params.queryName,
+                       revision:  this.props.match.params.revision}
+
+    if (shouldUpdate(prevProps, nextProps)){
+      handleLoadQueryFromURL(this.props.match.params)}
+    };
 
   render() {
     return (
@@ -57,12 +78,12 @@ class QueryEditorScreen extends Component {
         loadingQueries={this.props.loadingQueries}
         showSidebar={this.props.showSidebar}
         namespaces={this.props.namespaces}
-        namespace={this.props.namespace}
+        namespace={this.props.selectedNamespace}
         collapsedNamespace={this.props.collapsedNamespace}
         queries={this.props.queries}
         toggleSidebar={handleToggleSidebar}
-        loadQueries={handleLoadQueries}
-        loadQuery={handleLoadQuery}
+        loadQueries={handleSidebarLoadQueries}
+        loadQuery={handleSidebarLoadQuery}
       >
         <QueryNavbar
           logo={Logo}
@@ -94,7 +115,9 @@ class QueryEditorScreen extends Component {
             // RevisionCombo props
             shouldLoadRevisions={this.props.shouldLoadRevisions}
             loadRevisions={handleLoadRevisions}
-            handleLoadQueryRevision={handleLoadQueryRevision}
+            handleRedirectToQuery={handleRedirectToQuery}
+            history={this.props.history}
+            revisionNumber={this.props.revisionNumber}
             // Listeners to run query
             onQueryStringChange={handleQueryStringChange}
             onParamsChange={handleParamsChange}
@@ -110,6 +133,7 @@ class QueryEditorScreen extends Component {
 }
 
 const mapStateToProps = state => ({
+  // Query Editor configurations
   queryString: state.queryReducer.query,
   queryParams: state.queryReducer.queryParams,
   resultString: state.queryReducer.queryResult,
@@ -117,14 +141,19 @@ const mapStateToProps = state => ({
   queryName: state.queryReducer.queryName,
   namespaces: state.queryReducer.namespaces,
   namespace: state.queryReducer.namespace,
-  loadingQueries: state.queryReducer.loadingQueries,
-  queries: state.queryReducer.queries,
   collapsedNamespace: state.queryReducer.collapsedNamespace,
   loadingNamespaces: state.queryReducer.loadingNamespaces,
   revisions: state.queryReducer.revisions,
   shouldLoadRevisions: state.queryReducer.shouldLoadRevisions,
   showModal: state.queryReducer.showModal,
   showSidebar: state.queryReducer.showSidebar,
+  revisionNumber: state.queryReducer.revision,
+
+  //Sidebar configurations
+  selectedNamespace: state.sidebarReducer.namespace,
+  selectedQueryName: state.sidebarReducer.queryName,
+  loadingQueries: state.sidebarReducer.loadingQueries,
+  queries: state.sidebarReducer.queries,
 
   // Env configurations
   tenants: state.environmentReducer.tenants,

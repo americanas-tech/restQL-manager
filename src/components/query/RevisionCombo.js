@@ -23,9 +23,8 @@ export default class RevisionCombo extends Component {
   render() {
     if (this.props.toggle) {
       const options = this.renderOptions();
-
       return (
-        <select className="revisionPicker" onChange={this.props.handleLoadQueryRevision}>
+        <select className="revisionPicker" onChange={this.props.onChange} value={this.props.revisionNumber}>
           {options}
         </select>
       );

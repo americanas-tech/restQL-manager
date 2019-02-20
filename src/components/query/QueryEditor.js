@@ -81,7 +81,8 @@ export default class QueryEditor extends Component {
               <RevisionCombo
                 toggle={this.props.revisions.length > 0}
                 revisions={this.props.revisions}
-                handleLoadQueryRevision={this.props.handleLoadQueryRevision}
+                onChange={this.props.handleRedirectToQuery(this.props.history)}
+                revisionNumber={this.props.revisionNumber}
               />
             )}
           </div>

@@ -27,6 +27,7 @@ import Logo from "../restQL-logo.svg";
 import ResourcesNavbar from "./ResourcesNavbar";
 import ResourcesMenu from "./ResourcesMenu";
 import ResourcesEditor from "./ResourcesEditor";
+import { handleNewQuery } from "../../actions/queryActionCreator";
 
 class ResourcesEditorScreen extends Component {
   constructor(props) {
@@ -41,7 +42,7 @@ class ResourcesEditorScreen extends Component {
   render() {
     return (
       <div>
-        <ResourcesNavbar logo={Logo} queryEditorLink={""} />
+        <ResourcesNavbar logo={Logo} queryEditorLink={""} newQuery={handleNewQuery} />
 
         <Row>
           <Col xs={4} md={2}>

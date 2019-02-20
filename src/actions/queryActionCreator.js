@@ -5,6 +5,7 @@
 
 // Redux actions
 import { QUERY_ACTIONS } from "../reducers/queryReducer";
+import { SIDEBAR_ACTIONS } from "../reducers/sidebarReducer"
 
 // API Calls and processing dependencies
 import {
@@ -22,7 +23,11 @@ const store = require("../store/storeConfig").store;
 // UI State manipulation
 export function handleNewQuery() {
   store.dispatch({
-    type: QUERY_ACTIONS.INITIAL_STATE
+    type: QUERY_ACTIONS.INITIAL_STATE,
+  });
+
+  store.dispatch({
+    type: SIDEBAR_ACTIONS.INITIAL_STATE,
   });
 
   handleLoadNamespaces();
@@ -182,14 +187,22 @@ export function handleLoadRevisions() {
   });
 }
 
-export function handleLoadQueryRevision(evt) {
-  const dispatch = store.dispatch;
+export const handleRedirectToQuery = navigation => evt => {  
+  const revision = evt.target.value
 
   const { namespace, queryName } = store.getState().queryReducer;
 
+  let path = `/query/${namespace}/${queryName}/${revision}`
+
+  return navigation.push(path)
+}
+
+export function handleLoadQueryFromURL({ namespace, queryName, revision }) {
+  const dispatch = store.dispatch;
+
   dispatch({ type: QUERY_ACTIONS.QUERY_LOADING });
 
-  loadRevision(namespace, queryName, evt.target.value, (response, error) => {
+  loadRevision(namespace, queryName, revision, (response, error) => {
     if (error) {
       dispatch({
         type: QUERY_ACTIONS.QUERY_ERROR,
@@ -198,9 +211,12 @@ export function handleLoadQueryRevision(evt) {
     } else {
       dispatch({
         type: QUERY_ACTIONS.QUERY_LOADED,
+        namespace: namespace,
         queryName: queryName,
+        revision: revision,
         value: response
       });
+      dispatch({ type: QUERY_ACTIONS.LOAD_REVISIONS })
     }
   });
 }
