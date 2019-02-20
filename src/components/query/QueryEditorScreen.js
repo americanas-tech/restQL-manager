@@ -43,7 +43,7 @@ import QuerySidebar from "./QuerySidebar";
 import QueryEditor from "./QueryEditor";
 
 function shouldUpdate(prevProps, nextProps) {
-  return (prevProps.namespace !== nextProps.namespace || prevProps.queryName !== nextProps.queryName || prevProps.revisionNumber !== nextProps.revision) && (nextProps.queryName !== undefined)
+  return (prevProps.namespace !== nextProps.namespace || prevProps.queryName !== nextProps.queryName || prevProps.revisionNumber !== nextProps.revision)
 }
 
 class QueryEditorScreen extends Component {
