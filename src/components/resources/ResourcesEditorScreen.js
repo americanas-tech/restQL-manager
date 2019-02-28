@@ -33,8 +33,10 @@ class ResourcesEditorScreen extends Component {
   constructor(props) {
     super(props);
 
-    if (this.props.tenants.length === 0) handleLoadTenants();
-    if (this.props.resources.length === 0) handleLoadResources();
+    if (this.props.tenants.length === 0)
+      handleLoadTenants(() => {
+        if (this.props.resources.length === 0) handleLoadResources();
+      });
   }
 
   sortFn = (a, b) => a.name > b.name;
@@ -42,7 +44,11 @@ class ResourcesEditorScreen extends Component {
   render() {
     return (
       <div>
-        <ResourcesNavbar logo={Logo} queryEditorLink={""} newQuery={handleNewQuery} />
+        <ResourcesNavbar
+          logo={Logo}
+          queryEditorLink={""}
+          newQuery={handleNewQuery}
+        />
 
         <Row>
           <Col xs={4} md={2}>
@@ -59,7 +65,9 @@ class ResourcesEditorScreen extends Component {
           <Col xs={8} md={10}>
             <ResourcesEditor
               tenant={this.props.tenant}
+              loadingTenants={this.props.loadingTenants}
               resources={this.props.resources}
+              loadingResources={this.props.loadingResources}
               activeResource={this.props.activeResource}
               showSaveResourceModal={this.props.showSaveResourceModal}
               authorizationKey={this.props.authorizationKey}
@@ -82,9 +90,11 @@ class ResourcesEditorScreen extends Component {
 const mapStateToProps = state => ({
   // Env configurations
   tenants: state.environmentReducer.tenants,
+  loadingTenants: state.environmentReducer.loadingTenants,
   tenant: state.environmentReducer.tenant,
   activeTenant: state.environmentReducer.activeTenant,
   resources: state.environmentReducer.resources,
+  loadingResources: state.environmentReducer.loadingResources,
   activeResource: state.environmentReducer.activeResource,
   showSaveResourceModal: state.environmentReducer.showSaveResourceModal,
 

@@ -1,41 +1,42 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import { Row, Col, Button } from 'react-bootstrap';
-import FontAwesome from 'react-fontawesome';
+import { Row, Col, Button } from "react-bootstrap";
+import FontAwesome from "react-fontawesome";
 
-import SaveResourceModal from './SaveResourceModal';
+import SaveResourceModal from "./SaveResourceModal";
+
+const resourcesList = (res, type) => {
+  return (
+    <li key={res.name}>
+      <p className={`status-${type}`}>{res.name}</p>
+      <p className="resource-url">
+        {res["url"]}
+        <Button
+          className="btn-xs"
+          bsStyle="success"
+          onClick={() => this.props.setActiveResourceAndToggleModal(res)}
+        >
+          <FontAwesome name="pencil" />
+        </Button>
+      </p>
+    </li>
+  );
+};
+
+const resourceSuccessList = ({ resources }) =>
+  resources
+    .filter(res => !!res.status && res.status >= 200 && res.status < 500)
+    .map(res => resourcesList(res, "success"));
+
+const resourceErrorList = ({ resources }) =>
+  resources
+    .filter(res => !res.status || (!!res.status && res.status >= 500))
+    .map(res => resourcesList(res, "error"));
 
 export default class ResourcesEditor extends Component {
-
-  mapResources = (res, className) => {
-    return (
-      <li key={res.name}>
-        <p className={className}>
-          {res.name} - {res.status || 'ERROR'}
-        </p>
-        <p className="resource-url">
-          {res['url']}
-          <Button className="btn-xs"
-            bsStyle="success"
-            onClick={() => this.props.setActiveResourceAndToggleModal(res)}>
-            <FontAwesome name="pencil" />
-          </Button>
-        </p>
-      </li>
-    );
-  }
-
   render() {
-    if (this.props.resources.length > 0) {
-      const resourceSuccessList = this.props.resources
-        .filter((res) => res.status === 200)
-        .map((res) => this.mapResources(res, 'status-success'));
-
-      const resourceErrorList = this.props.resources
-        .filter((res) => res.status !== 200)
-        .map((res) => this.mapResources(res, 'status-error'));
-
-      const newResource = { name: '', url: '', 'base-url': '' };
+    if (!this.props.loadingTenants && !!this.props.tenant) {
+      const newResource = { name: "", url: "", "base-url": "" };
 
       return (
         <Row>
@@ -44,41 +45,52 @@ export default class ResourcesEditor extends Component {
 
           <Col xs={12} className="btn-separator">
             <Row>
-              <Button bsStyle="success"
-                onClick={() => this.props.setActiveResourceAndToggleModal(newResource)}>
+              <Button
+                bsStyle="success"
+                onClick={() =>
+                  this.props.setActiveResourceAndToggleModal(newResource)}
+              >
                 Add New Resource
-                            </Button>
+              </Button>
             </Row>
           </Col>
 
-          <Col sm={12} md={6}>
-            <h4>Reachable Resources</h4>
-            <hr />
-            <ul>{resourceSuccessList}</ul>
-          </Col>
+          {!this.props.loadingResources &&
+            this.props.resources.length > 0 && (
+              <Col sm={12} md={6}>
+                <h4>Reachable Resources</h4>
+                <hr />
+                <ul>{resourceSuccessList(this.props)}</ul>
+              </Col>
+            )}
 
-          <Col sm={12} md={6}>
-            <h4>Unreachable Resources</h4>
-            <hr />
-            <ul>{resourceErrorList}</ul>
-          </Col>
+          {!this.props.loadingResources &&
+            this.props.resources.length > 0 && (
+              <Col sm={12} md={6}>
+                <h4>Unreachable Resources</h4>
+                <hr />
+                <ul>{resourceErrorList(this.props)}</ul>
+              </Col>
+            )}
 
-          <SaveResourceModal authorizationKey={this.props.authorizationKey}
+          <SaveResourceModal
+            authorizationKey={this.props.authorizationKey}
             activeResource={this.props.activeResource}
             tenant={this.props.tenant}
             toggleModal={this.props.handleToggleSaveResourceModal}
             show={this.props.showSaveResourceModal}
             resourceUpdated={this.props.resourceUpdated}
             updateMessage={this.props.updateMessage}
-            handleAuthorizationKeyChanged={this.props.handleAuthorizationKeyChanged}
+            handleAuthorizationKeyChanged={
+              this.props.handleAuthorizationKeyChanged
+            }
             handleResourceNameChanged={this.props.handleResourceNameChanged}
             handleResourceUrlChanged={this.props.handleResourceUrlChanged}
-            handleSave={this.props.handleSaveResource} />
+            handleSave={this.props.handleSaveResource}
+          />
         </Row>
       );
-
-    }
-    else
+    } else
       return (
         <Row>
           <h1>No tenant</h1>
@@ -89,5 +101,4 @@ export default class ResourcesEditor extends Component {
         </Row>
       );
   }
-
 }

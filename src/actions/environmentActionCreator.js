@@ -25,20 +25,24 @@ export function handleActiveTenant(tenantKey) {
   handleLoadResources(null);
 }
 
-export function handleLoadTenants() {
+export function handleLoadTenants(cb) {
   const dispatch = store.dispatch;
+
+  dispatch({ type: ENVIRONMENT_ACTIONS.LOAD_TENANTS });
 
   loadTenants((response, error) => {
     let result = error ? {} : response;
     const tenants = result.tenants || [];
 
     if (tenants.length > 0) {
-      dispatch({ type: ENVIRONMENT_ACTIONS.LOAD_TENANTS, value: tenants });
+      dispatch({ type: ENVIRONMENT_ACTIONS.SET_TENANTS, value: tenants });
       dispatch({ type: ENVIRONMENT_ACTIONS.SET_ACTIVE_TENANT, value: 0 });
       dispatch({ type: ENVIRONMENT_ACTIONS.SET_TENANT, value: tenants[0] });
     } else {
-      dispatch({ type: ENVIRONMENT_ACTIONS.LOAD_TENANTS, value: [] });
+      dispatch({ type: ENVIRONMENT_ACTIONS.SET_TENANTS, value: [] });
     }
+
+    if (!!cb) cb(tenants);
   });
 }
 
@@ -65,10 +69,11 @@ export function handleLoadResources() {
   const currentTenant = tenant !== null ? tenant : tenants[activeTenant];
 
   dispatch({ type: ENVIRONMENT_ACTIONS.CLEAR_RESOURCES });
+  dispatch({ type: ENVIRONMENT_ACTIONS.LOAD_RESOURCES });
 
   loadResourcesFromTenant(currentTenant, (response, error) => {
     const resources = error ? [] : response;
-    dispatch({ type: ENVIRONMENT_ACTIONS.LOAD_RESOURCES, value: resources });
+    dispatch({ type: ENVIRONMENT_ACTIONS.SET_RESOURCES, value: resources });
   });
 }
 
