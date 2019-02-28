@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 
 const persistence = require("./persistence");
 const { runQuery, runNamedQuery } = require("./query-runner");
+const { tenantsHandler } = require("./tentant/handler");
 
 const AUTHORIZATION_KEY = process.env.AUTHORIZATION_KEY || "";
 
@@ -12,13 +13,7 @@ const app = express();
 app.use(express.static(path.resolve(__dirname, "..", "..", "build")));
 app.use(bodyParser.json());
 
-app.get("/tenants", (req, res) => {
-  persistence.loadTenants().then(tenants => {
-    res.json({
-      tenants: tenants
-    });
-  });
-});
+app.get("/tenants", tenantsHandler);
 
 app.get("/resources/:tenant", (req, res) => {
   persistence.loadResourcesFromTenant(req.params.tenant).then(resources => {
