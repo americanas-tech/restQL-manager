@@ -69,6 +69,13 @@ function loadTenants() {
     });
 }
 
+function addTenant(tenant) {
+  return models.Tenant.create({
+    _id: tenant,
+    mappings: {}
+  });
+}
+
 function loadResourcesFromTenant(tenant) {
   return models.Tenant
     .findOne(
@@ -226,6 +233,7 @@ function addQuery(namespace, name, query) {
 
 module.exports = {
   loadTenants,
+  addTenant,
   loadResourcesFromTenant,
   saveResource,
   loadNamespaces,
