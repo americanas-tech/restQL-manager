@@ -17,8 +17,10 @@ export const ENVIRONMENT_ACTIONS = {
   INITIAL_STATE: "ENV_INITIAL_STATE",
 
   LOAD_TENANTS: "LOAD_TENANTS",
+  SET_TENANTS: "SET_TENANTS",
   SET_TENANT: "SET_TENANT",
   LOAD_RESOURCES: "LOAD_RESOURCES",
+  SET_RESOURCES: "SET_RESOURCES",
   CLEAR_RESOURCES: "CLEAR_RESOURCES",
 
   SET_ACTIVE_TENANT: "SET_ACTIVE_TENANT",
@@ -38,7 +40,13 @@ const environmentReducer = (state = initialState, action) => {
     case ENVIRONMENT_ACTIONS.LOAD_TENANTS:
       return {
         ...state,
-        tenants: action.value
+        loadingTenants: true
+      };
+    case ENVIRONMENT_ACTIONS.SET_TENANTS:
+      return {
+        ...state,
+        tenants: action.value,
+        loadingTenants: false
       };
     case ENVIRONMENT_ACTIONS.SET_TENANT:
       return {
@@ -48,7 +56,13 @@ const environmentReducer = (state = initialState, action) => {
     case ENVIRONMENT_ACTIONS.LOAD_RESOURCES:
       return {
         ...state,
-        resources: action.value
+        loadingResources: true
+      };
+    case ENVIRONMENT_ACTIONS.SET_RESOURCES:
+      return {
+        ...state,
+        resources: action.value,
+        loadingResources: false
       };
     case ENVIRONMENT_ACTIONS.CLEAR_RESOURCES:
       return {
