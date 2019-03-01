@@ -5,7 +5,7 @@ import FontAwesome from "react-fontawesome";
 
 import SaveResourceModal from "./SaveResourceModal";
 
-const resourcesList = (res, type) => {
+const resourcesList = (res, type, setActiveResourceAndToggleModal) => {
   return (
     <li key={res.name}>
       <p className={`status-${type}`}>{res.name}</p>
@@ -14,7 +14,7 @@ const resourcesList = (res, type) => {
         <Button
           className="btn-xs"
           bsStyle="success"
-          onClick={() => this.props.setActiveResourceAndToggleModal(res)}
+          onClick={() => setActiveResourceAndToggleModal(res)}
         >
           <FontAwesome name="pencil" />
         </Button>
@@ -23,15 +23,15 @@ const resourcesList = (res, type) => {
   );
 };
 
-const resourceSuccessList = ({ resources }) =>
+const resourceSuccessList = ({ resources, setActiveResourceAndToggleModal }) =>
   resources
     .filter(res => !!res.status && res.status >= 200 && res.status < 500)
-    .map(res => resourcesList(res, "success"));
+    .map(res => resourcesList(res, "success", setActiveResourceAndToggleModal));
 
-const resourceErrorList = ({ resources }) =>
+const resourceErrorList = ({ resources, setActiveResourceAndToggleModal }) =>
   resources
     .filter(res => !res.status || (!!res.status && res.status >= 500))
-    .map(res => resourcesList(res, "error"));
+    .map(res => resourcesList(res, "error", setActiveResourceAndToggleModal));
 
 export default class ResourcesEditor extends Component {
   render() {
