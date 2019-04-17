@@ -1,7 +1,7 @@
 export const initialState = {
-    namespace: undefined,
-    queryName: undefined,
-    revision: undefined,
+    namespace: "",
+    queryName: "",
+    revision: null,
   };
 
 export const SIDEBAR_ACTIONS = {

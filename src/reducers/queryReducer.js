@@ -1,7 +1,7 @@
 // Initial state
 export const initialState = {
-  namespace: undefined,
-  queryName: undefined,
+  namespace: "",
+  queryName: "",
   query: "",
   queryParams: "",
   running: false,
@@ -16,7 +16,7 @@ export const initialState = {
   queries: [],
   revisions: [],
 
-  revisionNumber: undefined,
+  revisionNumber: null,
   
 
   shouldLoadRevisions: false
