@@ -17,7 +17,7 @@ export const initialState = {
   revisions: [],
 
   revisionNumber: null,
-  
+  revision: 1,
 
   shouldLoadRevisions: false
 };
@@ -126,8 +126,8 @@ const queryReducer = (state = initialState, action) => {
         showSidebar: false
       };
     case QUERY_ACTIONS.LOAD_URL_QUERY:
-      return { 
-        ...state, 
+      return {
+        ...state,
         shouldLoadRevisions: true,
         namespace: action.namespace,
         queryName: action.queryName,
@@ -142,7 +142,7 @@ const queryReducer = (state = initialState, action) => {
         running: true,
         shouldLoadRevisions: false,
         revisions: []
-        };
+      };
     case QUERY_ACTIONS.REVISIONS_LOADED:
       return { ...state, running: false, revisions: action.value };
     case QUERY_ACTIONS.INITIAL_STATE:

@@ -23,7 +23,7 @@ import {
   handleSaveQuery,
   handleLoadRevisions,
   handleRedirectToQuery,
-  handleLoadQueryFromURL,
+  handleLoadQueryFromURL
 } from "../../actions/queryActionCreator";
 
 import {
@@ -31,7 +31,10 @@ import {
   handleSetTenant
 } from "../../actions/environmentActionCreator";
 
-import { handleSidebarLoadQueries, handleSidebarLoadQuery } from "../../actions/sidebarActionCreator";
+import {
+  handleSidebarLoadQueries,
+  handleSidebarLoadQuery
+} from "../../actions/sidebarActionCreator";
 
 // CSS for this screen and logo
 import "./QueryEditorScreen.css";
@@ -43,7 +46,12 @@ import QuerySidebar from "./QuerySidebar";
 import QueryEditor from "./QueryEditor";
 
 function shouldUpdate(prevProps, nextProps) {
-  return (prevProps.namespace !== nextProps.namespace || prevProps.queryName !== nextProps.queryName || prevProps.revisionNumber !== nextProps.revision) && (nextProps.queryName !== undefined)
+  return (
+    (prevProps.namespace !== nextProps.namespace ||
+      prevProps.queryName !== nextProps.queryName ||
+      prevProps.revisionNumber !== nextProps.revision) &&
+    nextProps.queryName !== undefined
+  );
 }
 
 class QueryEditorScreen extends Component {
@@ -56,19 +64,21 @@ class QueryEditorScreen extends Component {
 
   componentDidMount() {
     if (Object.keys(this.props.match.params).length > 0) {
-      handleLoadQueryFromURL(this.props.match.params)
-    };
+      handleLoadQueryFromURL(this.props.match.params);
+    }
   }
 
   componentDidUpdate(prevProps) {
-
-    const nextProps = {namespace: this.props.match.params.namespace,
-                       queryName: this.props.match.params.queryName,
-                       revision:  this.props.match.params.revision}
-
-    if (shouldUpdate(prevProps, nextProps)){
-      handleLoadQueryFromURL(this.props.match.params)}
+    const nextProps = {
+      namespace: this.props.match.params.namespace,
+      queryName: this.props.match.params.queryName,
+      revision: this.props.match.params.revision || 1
     };
+
+    if (shouldUpdate(prevProps, nextProps)) {
+      handleLoadQueryFromURL(this.props.match.params);
+    }
+  }
 
   render() {
     return (
@@ -118,6 +128,7 @@ class QueryEditorScreen extends Component {
             handleRedirectToQuery={handleRedirectToQuery}
             history={this.props.history}
             revisionNumber={this.props.revisionNumber}
+            lastRevision={this.props.lastRevision}
             // Listeners to run query
             onQueryStringChange={handleQueryStringChange}
             onParamsChange={handleParamsChange}
@@ -148,6 +159,7 @@ const mapStateToProps = state => ({
   showModal: state.queryReducer.showModal,
   showSidebar: state.queryReducer.showSidebar,
   revisionNumber: state.queryReducer.revision,
+  lastRevision: state.queryReducer.revisions.length,
 
   //Sidebar configurations
   selectedNamespace: state.sidebarReducer.namespace,
