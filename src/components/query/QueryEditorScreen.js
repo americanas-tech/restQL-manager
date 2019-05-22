@@ -73,13 +73,12 @@ class QueryEditorScreen extends Component {
     const nextProps = {
       namespace: this.props.match.params.namespace,
       queryName: this.props.match.params.queryName,
-      revision: this.props.match.params.revision || 1
+      revision: this.props.match.params.revision || prevProps.revisionNumber
     };
 
     if (shouldUpdate(prevProps, nextProps)) {
       handleLoadQueryFromURL(this.props.match.params);
     }
-    console.log(this.props.lastRevNumber);
   }
 
   render() {

@@ -211,7 +211,6 @@ function loadQueryInfo(namespace, queryName) {
         namespace: namespace,
         queryName: query.name,
         revisionsCount: query.size,
-        lastRevision: query.revisions[query.size - 1].text,
         revisions: query.revisions
       };
     });

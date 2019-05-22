@@ -202,25 +202,35 @@ export const handleRedirectToQuery = navigation => evt => {
   return navigation.push(path);
 };
 
-export function handleLoadQueryFromURL({ namespace, queryName, revision = 1 }) {
+export function handleLoadQueryFromURL({ namespace, queryName, revision }) {
   const dispatch = store.dispatch;
 
   dispatch({ type: QUERY_ACTIONS.QUERY_LOADING });
 
-  loadRevision(namespace, queryName, revision, (response, error) => {
+  loadQueryInfo(namespace, queryName, (response, error) => {
     if (error) {
       dispatch({
         type: QUERY_ACTIONS.QUERY_ERROR,
         value: error
       });
     } else {
-      dispatch({
-        type: QUERY_ACTIONS.QUERY_LOADED,
-        namespace: namespace,
-        queryName: queryName,
-        revision: revision,
-        value: response
-      });
+      if (revision === undefined) {
+        dispatch({
+          type: QUERY_ACTIONS.QUERY_LOADED,
+          namespace: namespace,
+          queryName: queryName,
+          revision: response.revisionsCount,
+          query: response.revisions[response.revisionsCount - 1].text
+        });
+      } else {
+        dispatch({
+          type: QUERY_ACTIONS.QUERY_LOADED,
+          namespace: namespace,
+          queryName: queryName,
+          revision: revision,
+          query: response.revisions[revision - 1].text
+        });
+      }
       dispatch({ type: QUERY_ACTIONS.LOAD_REVISIONS });
     }
   });
