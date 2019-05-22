@@ -13,7 +13,7 @@ import {
   loadQueries,
   loadRevisions,
   loadRevision,
-  loadRevisionByUrl,
+  loadQueryInfo,
   runQuery,
   saveQuery
 } from "../api/restQLAPI";
@@ -247,14 +247,12 @@ export function handleLoadQueries(namespace) {
   });
 }
 
-export function handleLoadQuery(query) {
+export function handleLoadQueryInfo(namespace, queryName) {
   const dispatch = store.dispatch;
 
-  dispatch({
-    type: QUERY_ACTIONS.QUERY_LOADING
-  });
+  dispatch({ type: QUERY_ACTIONS.QUERY_LOADING });
 
-  loadRevisionByUrl(query["last-revision"], (response, error) => {
+  loadQueryInfo(namespace, queryName, (response, error) => {
     if (error) {
       dispatch({
         type: QUERY_ACTIONS.QUERY_ERROR,
@@ -263,8 +261,7 @@ export function handleLoadQuery(query) {
     } else {
       dispatch({
         type: QUERY_ACTIONS.QUERY_LOADED,
-        queryName: query.id,
-        value: response
+        lastRevNumber: response.revisionsCount
       });
 
       dispatch({

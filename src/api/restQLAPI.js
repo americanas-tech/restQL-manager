@@ -226,3 +226,20 @@ export function loadRevision(namespace, queryName, revision, callback) {
       callback(null, error);
     });
 }
+
+export function loadQueryInfo(namespace, queryName, callback) {
+  const revisionUrl =
+    window.location.origin + "/ns/" + namespace + "/" + queryName;
+
+  fetch(revisionUrl, { headers: RESTQL_SERVER_HEADERS })
+    .then(checkStatus)
+    .then(response => {
+      return response.json();
+    })
+    .then(response => {
+      callback(response, null);
+    })
+    .catch(error => {
+      callback(null, error);
+    });
+}

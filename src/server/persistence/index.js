@@ -40,6 +40,7 @@ function buildQuery(query) {
     id: query.name,
     "last-revision":
       "/ns/" + query.namespace + "/" + query.name + "/" + query.size,
+    lastRevisionNum: query.size,
     revisions: "/ns/" + query.namespace + "/query/" + query.name
   };
 }
@@ -199,6 +200,23 @@ function loadQueryRevision(namespace, query, revision) {
     });
 }
 
+function loadQueryInfo(namespace, queryName) {
+  return models.Query
+    .findOne({
+      namespace: namespace,
+      name: queryName
+    })
+    .then(query => {
+      return {
+        namespace: namespace,
+        queryName: query.name,
+        revisionsCount: query.size,
+        lastRevision: query.revisions[query.size - 1].text,
+        revisions: query.revisions
+      };
+    });
+}
+
 function addQuery(namespace, name, query) {
   return models.Query
     .findOneAndUpdate(
@@ -240,5 +258,6 @@ module.exports = {
   loadQueries,
   loadQueryRevisions,
   loadQueryRevision,
+  loadQueryInfo,
   addQuery
 };

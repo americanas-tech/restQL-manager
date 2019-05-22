@@ -23,7 +23,8 @@ import {
   handleSaveQuery,
   handleLoadRevisions,
   handleRedirectToQuery,
-  handleLoadQueryFromURL
+  handleLoadQueryFromURL,
+  handleLoadQueryInfo
 } from "../../actions/queryActionCreator";
 
 import {
@@ -78,6 +79,7 @@ class QueryEditorScreen extends Component {
     if (shouldUpdate(prevProps, nextProps)) {
       handleLoadQueryFromURL(this.props.match.params);
     }
+    console.log(this.props.lastRevNumber);
   }
 
   render() {
@@ -128,7 +130,6 @@ class QueryEditorScreen extends Component {
             handleRedirectToQuery={handleRedirectToQuery}
             history={this.props.history}
             revisionNumber={this.props.revisionNumber}
-            lastRevision={this.props.lastRevision}
             // Listeners to run query
             onQueryStringChange={handleQueryStringChange}
             onParamsChange={handleParamsChange}
@@ -159,7 +160,7 @@ const mapStateToProps = state => ({
   showModal: state.queryReducer.showModal,
   showSidebar: state.queryReducer.showSidebar,
   revisionNumber: state.queryReducer.revision,
-  lastRevision: state.queryReducer.revisions.length,
+  lastRevNumber: state.queryReducer.lastRevNumber,
 
   //Sidebar configurations
   selectedNamespace: state.sidebarReducer.namespace,

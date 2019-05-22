@@ -102,6 +102,14 @@ app.get("/ns/:namespace/:query/:revision", (req, res) => {
     });
 });
 
+app.get("/ns/:namespace/:query", (req, res) => {
+  persistence
+    .loadQueryInfo(req.params.namespace, req.params.query)
+    .then(revision => {
+      res.send(revision);
+    });
+});
+
 app.post("/ns/:namespace/query/:name", (req, res) => {
   persistence
     .addQuery(req.params.namespace, req.params.name, req.body.query)

@@ -121,6 +121,7 @@ const queryReducer = (state = initialState, action) => {
         namespace: action.namespace,
         queryName: action.queryName,
         revision: action.revision,
+        lastRevNumber: action.lastRevNumber,
         query: action.value,
         running: false,
         showSidebar: false
