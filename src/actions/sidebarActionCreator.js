@@ -19,9 +19,11 @@ export function handleSidebarLoadQueries(namespace) {
     } else {
       dispatch({
         type: SIDEBAR_ACTIONS.QUERIES_LOADED,
-        value: response.queries.sort(function(a, b) {
-          return a.id.toLowerCase().localeCompare(b.id.toLowerCase());
-        })
+        value:
+          response.queries &&
+          response.queries.sort(function(a, b) {
+            return a.id.toLowerCase().localeCompare(b.id.toLowerCase());
+          })
       });
     }
   });
