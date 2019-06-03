@@ -162,9 +162,12 @@ export function handleLoadNamespaces() {
     } else {
       dispatch({
         type: QUERY_ACTIONS.NAMESPACES_LOADED,
-        value: response.sort(function(a, b) {
-          return a._id.toLowerCase().localeCompare(b._id.toLowerCase());
-        })
+        value:
+          (response &&
+            response.sort(function(a, b) {
+              return a._id.toLowerCase().localeCompare(b._id.toLowerCase());
+            })) ||
+          []
       });
     }
   });
@@ -215,12 +218,13 @@ export function handleLoadQueryFromURL({ namespace, queryName, revision }) {
       });
     } else {
       if (revision === undefined) {
+        const queryText = response.revisions[response.revisionsCount - 1].text;
         dispatch({
           type: QUERY_ACTIONS.QUERY_LOADED,
           namespace: namespace,
           queryName: queryName,
           revision: response.revisionsCount,
-          query: response.revisions[response.revisionsCount - 1].text
+          query: queryText || ""
         });
       } else {
         dispatch({
