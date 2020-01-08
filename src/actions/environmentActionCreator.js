@@ -32,7 +32,7 @@ export function handleLoadTenants(cb) {
 
   loadTenants((response, error) => {
     let result = error ? {} : response;
-    const tenants = result.tenants || [];
+    const tenants = (result.tenants && result.tenants.sort()) || [];
 
     if (tenants.length > 0) {
       dispatch({ type: ENVIRONMENT_ACTIONS.SET_TENANTS, value: tenants });
