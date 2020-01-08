@@ -186,7 +186,7 @@ function loadQueryRevision(namespace, query, revision) {
       },
       {
         revisions: {
-          $slice: [revision - 1, 1]
+          $slice: !!parseInt(revision) ? [revision - 1, 1] : -1
         },
         _id: 0,
         size: 0,
