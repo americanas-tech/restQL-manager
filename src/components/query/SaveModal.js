@@ -1,18 +1,43 @@
-import React, { Component } from 'react';
-import { Modal, Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import React, { Component } from "react";
+import { Modal, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 export default class SaveModal extends Component {
+  initialState = {
+    namespace: "",
+    queryName: ""
+  };
 
-  handleSave = () => {
-    let callback = this.props.onSave;
-    callback();
+  constructor() {
+    super();
 
-    this.props.toggleModal();
+    this.state = this.initialState;
   }
 
-  render() {
+  handleSave = (namespace, queryName) => {
+    let callback = this.props.onSave;
+    callback(namespace, queryName);
+    this.setState(this.initialState);
 
-    const button = (<Button bsStyle="info" onClick={this.props.toggleModal} >Save Query</Button>);
+    this.props.toggleModal();
+  };
+
+  handleNamespaceChange = ev => {
+    this.setState({ namespace: ev.target.value });
+  };
+
+  handleQueryNameChange = ev => {
+    this.setState({ queryName: ev.target.value });
+  };
+
+  render() {
+    const namespace = this.state.namespace || this.props.namespace;
+    const queryName = this.state.queryName || this.props.queryName;
+
+    const button = (
+      <Button bsStyle="info" onClick={this.props.toggleModal}>
+        Save Query
+      </Button>
+    );
 
     const saveTooltip = (
       <Tooltip id="save-tooltip">
@@ -20,15 +45,16 @@ export default class SaveModal extends Component {
       </Tooltip>
     );
 
-    const buttonWithTooltip = (this.props.tooltip ? (
+    const buttonWithTooltip = this.props.tooltip ? (
       <OverlayTrigger placement="bottom" overlay={saveTooltip}>
         {button}
       </OverlayTrigger>
-    ) : button);
+    ) : (
+      button
+    );
 
     return (
       <span>
-
         {buttonWithTooltip}
 
         <Modal show={this.props.show} onHide={this.props.toggleModal}>
@@ -38,28 +64,36 @@ export default class SaveModal extends Component {
           <Modal.Body>
             <div className="form-group">
               <label>Namespace</label>
-              <input type="text"
+              <input
+                type="text"
                 className="form-control"
-                value={this.props.namespace}
-                onChange={this.props.handleNamespaceChange} />
+                value={namespace}
+                onChange={this.handleNamespaceChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Query Name</label>
-              <input type="text"
+              <input
+                type="text"
                 className="form-control"
-                value={this.props.queryName}
-                onChange={this.props.handleQueryNameChange} />
+                value={queryName}
+                onChange={this.handleQueryNameChange}
+              />
             </div>
           </Modal.Body>
 
           <Modal.Footer>
-            <Button bsStyle="success" onClick={this.handleSave}>Save</Button>
+            <Button
+              bsStyle="success"
+              onClick={() => this.handleSave(namespace, queryName)}
+            >
+              Save
+            </Button>
             <Button onClick={this.props.toggleModal}>Close</Button>
           </Modal.Footer>
         </Modal>
       </span>
     );
   }
-
 }

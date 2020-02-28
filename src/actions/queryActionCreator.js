@@ -5,7 +5,7 @@
 
 // Redux actions
 import { QUERY_ACTIONS } from "../reducers/queryReducer";
-import { SIDEBAR_ACTIONS } from "../reducers/sidebarReducer"
+import { SIDEBAR_ACTIONS } from "../reducers/sidebarReducer";
 
 // API Calls and processing dependencies
 import {
@@ -23,11 +23,11 @@ const store = require("../store/storeConfig").store;
 // UI State manipulation
 export function handleNewQuery() {
   store.dispatch({
-    type: QUERY_ACTIONS.INITIAL_STATE,
+    type: QUERY_ACTIONS.INITIAL_STATE
   });
 
   store.dispatch({
-    type: SIDEBAR_ACTIONS.INITIAL_STATE,
+    type: SIDEBAR_ACTIONS.INITIAL_STATE
   });
 
   handleLoadNamespaces();
@@ -103,9 +103,9 @@ export function handleRunQuery() {
   });
 }
 
-export function handleSaveQuery() {
+export function handleSaveQuery(namespace, queryName) {
   const dispatch = store.dispatch;
-  const { namespace, queryName, query } = store.getState().queryReducer;
+  const { query } = store.getState().queryReducer;
   const { tenant } = store.getState().environmentReducer;
 
   dispatch({
@@ -160,7 +160,12 @@ export function handleLoadNamespaces() {
       dispatch({ type: QUERY_ACTIONS.NAMESPACES_LOADED, value: [] });
       alert("Error loading namespaces: " + error);
     } else {
-      dispatch({ type: QUERY_ACTIONS.NAMESPACES_LOADED, value: response.sort(function (a, b) { return a._id.toLowerCase().localeCompare(b._id.toLowerCase()) })});
+      dispatch({
+        type: QUERY_ACTIONS.NAMESPACES_LOADED,
+        value: response.sort(function(a, b) {
+          return a._id.toLowerCase().localeCompare(b._id.toLowerCase());
+        })
+      });
     }
   });
 }
@@ -187,15 +192,15 @@ export function handleLoadRevisions() {
   });
 }
 
-export const handleRedirectToQuery = navigation => evt => {  
-  const revision = evt.target.value
+export const handleRedirectToQuery = navigation => evt => {
+  const revision = evt.target.value;
 
   const { namespace, queryName } = store.getState().queryReducer;
 
-  let path = `/query/${namespace}/${queryName}/${revision}`
+  let path = `/query/${namespace}/${queryName}/${revision}`;
 
-  return navigation.push(path)
-}
+  return navigation.push(path);
+};
 
 export function handleLoadQueryFromURL({ namespace, queryName, revision }) {
   const dispatch = store.dispatch;
@@ -216,7 +221,7 @@ export function handleLoadQueryFromURL({ namespace, queryName, revision }) {
         revision: revision,
         value: response
       });
-      dispatch({ type: QUERY_ACTIONS.LOAD_REVISIONS })
+      dispatch({ type: QUERY_ACTIONS.LOAD_REVISIONS });
     }
   });
 }
