@@ -19,9 +19,12 @@ if (process.env.NODE_ENV == "production") {
   });
 }
 
-const db = mongoose.connect(MONGO_URL, {
-  useMongoClient: true
-});
+const db = (() => {
+  mongoose.connect(MONGO_URL, {
+    useMongoClient: true
+  });
+  return mongoose.connection;
+})();
 
 const QuerySchema = new mongoose.Schema(
   {
