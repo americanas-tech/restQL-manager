@@ -3,7 +3,7 @@ const path = require("path");
 const bodyParser = require("body-parser");
 
 const persistence = require("./persistence");
-const { runQuery, runNamedQuery } = require("./query-runner");
+const { runQuery, runNamedQuery, validateQuery } = require("./query-runner");
 const { tenantsHandler } = require("./tentant/handler");
 
 const AUTHORIZATION_KEY = process.env.AUTHORIZATION_KEY || "";
@@ -39,6 +39,12 @@ app.post("/resources/:tenant/update", (req, res) => {
 app.post("/run-query", (req, res) => {
   runQuery(req.body.query, req.query, req.headers).then(json => {
     res.json(json);
+  });
+});
+
+app.post("/validate-query", (req, res) => {
+  validateQuery(req.body.query).then(validationResult => {
+    res.status(validationResult.status).json(validationResult.body);
   });
 });
 

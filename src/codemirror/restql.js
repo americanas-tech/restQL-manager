@@ -2,7 +2,12 @@ import CodeMirror from "codemirror";
 
 // Language reserved words
 const languageTokenList = [
+  "use",
   "from",
+  "to",
+  "update",
+  "into",
+  "delete",
   "as",
   "headers",
   "timeout",
@@ -23,11 +28,20 @@ const languageOperatorsList = ["flatten", "expand", "contract", "json"];
       // You can match multiple tokens at once. Note that the captured
       // groups must span the whole string in this case
       {
-        regex: /(?:from|as|headers|with|only|json|flatten|timeout|hidden|ignore-errors)/,
+        regex: /([\w-_@+*&^%#]+)(from|to|into|update|delete|as|headers|with|only|json|flatten|timeout|hidden|ignore-errors)([\w-_@+*&^%#]*)/,
+        token: "error"
+      },
+      {
+        regex: /([\w-_@+*&^%#]*)(from|to|into|update|delete|as|headers|with|only|json|flatten|timeout|hidden|ignore-errors)([\w-_@+*&^%#]+)/,
+        token: "error"
+      },
+      {
+        regex: /(?:use|from|to|into|update|delete|as|headers|with|only|json|flatten|timeout|hidden|ignore-errors)/,
         token: ["keyword"]
       },
       // Rules are matched in the order in which they appear, so there is
       // no ambiguity between this one and the one above
+      { regex: /cache-control/, token: "error" },
       { regex: /true|false|null|undefined/, token: "atom" },
       {
         regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i,

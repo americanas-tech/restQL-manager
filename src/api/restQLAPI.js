@@ -10,6 +10,7 @@ function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
   } else {
+    console.log("validation error", response);
     var error = new Error(response.statusText);
     error.response = response;
     throw error;
@@ -113,6 +114,30 @@ export function runQuery(
 
 // Saving a query
 export function saveQuery(tenant, namespace, queryName, queryString, callback) {
+  const validateQueryUrl = window.location.origin + "/validate-query";
+
+  let body = JSON.stringify({
+    query: queryString
+  });
+
+  fetch(validateQueryUrl, {
+    headers: RESTQL_SERVER_HEADERS,
+    body: body,
+    method: "POST"
+  })
+    .then(response => {
+      if (response.status === 200) {
+        persistQuery(tenant, namespace, queryName, queryString, callback);
+      } else {
+        parseJSON(response).then(json => callback(null, json));
+      }
+    })
+    .catch(error => {
+      callback(null, error);
+    });
+}
+
+function persistQuery(tenant, namespace, queryName, queryString, callback) {
   const saveQueryUrl =
     window.location.origin +
     "/ns/" +

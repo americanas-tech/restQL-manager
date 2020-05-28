@@ -1,3 +1,4 @@
+const { Promise } = require("es6-promise");
 const url = require("url");
 const fetch = require("node-fetch");
 
@@ -13,15 +14,15 @@ function mergeHeaders(reqHeaders, defaultHeaders) {
 }
 
 function runQuery(queryText, params, requestHeaders) {
-  return fetch(
-    RESTQL_SERVER_URL + "/run-query" + url.format({ query: params }),
-    {
-      method: "POST",
-      headers: mergeHeaders(requestHeaders, RESTQL_HEADERS),
-      body: queryText
-    }
-  )
+  const target =
+    RESTQL_SERVER_URL + "/run-query" + url.format({ query: params });
+  return fetch(target, {
+    method: "POST",
+    headers: mergeHeaders(requestHeaders, RESTQL_HEADERS),
+    body: queryText
+  })
     .then(response => {
+      console.log("response was ", response.status);
       return response.json();
     })
     .then(json => {
@@ -30,6 +31,18 @@ function runQuery(queryText, params, requestHeaders) {
     .catch(error => {
       return error;
     });
+}
+
+function validateQuery(queryText) {
+  return fetch(RESTQL_SERVER_URL + "/validate-query", {
+    method: "POST",
+    headers: RESTQL_HEADERS,
+    body: queryText
+  }).then(response => {
+    const body =
+      response.status === 200 ? Promise.resolve({}) : response.json();
+    return body.then(json => ({ status: response.status, body: json }));
+  });
 }
 
 function runNamedQuery(namespace, name, revision, params, requestHeaders) {
@@ -61,5 +74,6 @@ function runNamedQuery(namespace, name, revision, params, requestHeaders) {
 
 module.exports = {
   runQuery: runQuery,
-  runNamedQuery: runNamedQuery
+  runNamedQuery: runNamedQuery,
+  validateQuery: validateQuery
 };
