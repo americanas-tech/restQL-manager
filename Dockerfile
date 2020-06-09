@@ -6,6 +6,6 @@ ENV NODE_ENV=production
 COPY LICENSE /app/LICENSE
 COPY README.md /app/README.md
 
-RUN npm install -g @b2wdigital/restql-manager@0.2.8
+RUN npm install -g @b2wdigital/restql-manager@0.3.0
 
 CMD ["restql-manager"]
