@@ -15,7 +15,7 @@ const languageTokenList = [
   "only",
   "hidden"
 ];
-const languageOperatorsList = ["flatten", "expand", "contract", "json"];
+const languageOperatorsList = ["no-multiplex", "expand", "contract", "json"];
 
 (function(mod) {
   mod(CodeMirror);
@@ -28,7 +28,7 @@ const languageOperatorsList = ["flatten", "expand", "contract", "json"];
       // You can match multiple tokens at once. Note that the captured
       // groups must span the whole string in this case
       {
-        regex: /(?:use|from|to|into|update|delete|as|headers|with|only|json|flatten|timeout|hidden|ignore-errors)/,
+        regex: /(?:use|from|to|into|update|delete|as|headers|with|only|json|no-multiplex|timeout|hidden|ignore-errors)/,
         token: ["keyword"]
       },
       // Rules are matched in the order in which they appear, so there is
