@@ -5,9 +5,6 @@ import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
 import Select, {components, InputActionMeta, InputProps} from 'react-select';
 
-const disableNoOptionsMessage = () => null;
-const Input = (props: InputProps) => <components.Input {...props} isHidden={false} />;
-
 // Source: https://github.com/JedWatson/react-select/issues/1558#issuecomment-738880505
 function EditableSelect(props: any) {
   const [option, setOption] = useState<{label: string, value: string} | null>();
@@ -34,9 +31,26 @@ function EditableSelect(props: any) {
       controlShouldRenderValue={false}
       components={{Input}}
       noOptionsMessage={disableNoOptionsMessage}
+      filterOption={filterOption}
     />
   );
 }
+
+const queryTargetRegex = /\/([^?/]*)/gm; 
+
+const filterOption = (candidate: {label: string, value: string, data: any}, input: string) => {
+  const matches = input.match(queryTargetRegex) || [];
+  if (matches.length >= 2) {
+    const namespacedQuery = `${matches[0]}${matches[1]}`
+    return candidate.label.includes(namespacedQuery);
+  }
+
+  return candidate.label.includes(input);
+};
+
+
+const Input = (props: InputProps) => <components.Input {...props} isHidden={false} />;
+const disableNoOptionsMessage = () => null;
 
 type QueryControlsProps = {
   queries: string[]

@@ -9,6 +9,8 @@ function QueryExplorer() {
   const [code, setCode] = useState("")
   const queries = [
     "/demo/httpbin-get/1",
+    "/demo/httpbin-get/2",
+    "/demo/httpbin-get/3",
     "/demo/demo-product/1",
     "/demo/demo-offer/1",
     "/demo/demo-sku/1",
