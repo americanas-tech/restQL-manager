@@ -2,8 +2,7 @@ import { useState } from 'react';
 import './index.scss';
 
 import QueryControls from './query-controls';
-import Editor from './editor';
-
+import QueryInputs from './query-inputs';
 
 function QueryExplorer() {
   const [code, setCode] = useState("")
@@ -17,15 +16,15 @@ function QueryExplorer() {
   ]
 
   return (
-    <div>
+    <>
       <div className="query-explorer__controls--wrapper">
         <QueryControls queries={queries} />
       </div>
       <div className="query-explorer__input-output--wrapper">
-        <Editor className="query-explorer__editor" code={"from cart"} onChange={setCode} />
+        <QueryInputs />
         <textarea className="query-explorer__result" name="queryResults">{"ausdasdasdasdasdas"}</textarea>
       </div>
-    </div>
+    </>
   )
 }
 
