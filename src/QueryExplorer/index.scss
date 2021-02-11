@@ -1,0 +1,22 @@
+.query-explorer__controls--wrapper {
+  height: 12vh;
+}
+
+.query-explorer__input-output--wrapper {
+  max-width: 100vw;
+  max-height: 100vh;
+
+  height: 88vh;
+  display: flex;
+}
+
+.query-explorer__editor {
+  width: 100%;
+  max-width: 100%;
+}
+
+.query-explorer__result {
+  width: 100%;
+  max-width: 100%;
+  resize: none;
+}

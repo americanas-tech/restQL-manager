@@ -1,0 +1,19 @@
+// RestQL Theme
+
+$primary: #001b59;
+$secondary: #d84e40;
+$accent: #67e7c2;
+$gray: #e7e7e7;
+$white: #fffbfe;
+$black: #20201e;
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('https://fonts.googleapis.com/css2?family=Roboto&display=swap') format('truetype');
+}
+
+* {
+  font-family: 'Roboto', sans-serif;
+}

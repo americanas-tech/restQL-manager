@@ -1,7 +1,7 @@
 import CodeMirror from 'codemirror';
 import CodeMirrorEditor from '@uiw/react-codemirror';
 import 'codemirror/keymap/sublime';
-import 'codemirror/theme/monokai.css';
+import 'codemirror/theme/eclipse.css';
 import './restql.js';
 
 type EditorProps = {
@@ -19,7 +19,7 @@ function Editor(props: EditorProps) {
       <CodeMirrorEditor
         value={code}
         options={{
-          theme: 'monokai',
+          theme: 'eclipse',
           keyMap: 'sublime',
           mode: 'restql',
           lineWrapping: true,

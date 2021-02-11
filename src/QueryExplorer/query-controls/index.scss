@@ -1,0 +1,81 @@
+@import 'assets/theme';
+
+.query-controls {
+  display: flex;
+  background-color: $primary;
+  align-items: center;
+  height: 100%;
+  padding: 0 0.8rem;
+
+  > * {
+    margin-right: 1rem;
+  }
+}
+
+.query-controls__menu {
+  width: 40px;
+  height: 40px;
+  fill: $accent;
+}
+
+.query-controls__selector--wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80%;
+
+  p {
+    font-size: 1.4rem;
+    margin-right: 0.5rem;
+    color: $white;
+  }
+}
+
+.query-controls__selector {
+  width: 85%;
+  font-size: 1.5rem;
+  border-radius: 4px;
+}
+
+.query-controls__selector__value-container {
+  height: 3rem;
+}
+
+.query-controls__selector__value-container,
+.query-controls__selector__indicators,
+.query-controls__selector__menu,
+.query-controls__selector__menu-list,
+.customInput {
+  color: darken($gray, $amount: 60);
+  background-color: $white;
+}
+
+.query-controls__selector__option:hover,
+.query-controls__selector__option.query-controls__selector__option--is-focused {
+  background-color: $secondary;
+  color: $white;
+}
+
+.query-controls__selector__option.query-controls__selector__option--is-selected {
+  background-color: $accent;
+  color: $white;
+}
+
+.query-controls__actions--wrapper {
+  width: 20%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.query-controls button {
+  background-color: $secondary;
+  color: $white;
+  height: 50%;
+  width: 10rem;
+  border: none;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 800;
+  margin-right: 0.8rem;
+}
