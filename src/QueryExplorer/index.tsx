@@ -7,11 +7,17 @@ import Editor from './editor';
 
 function QueryExplorer() {
   const [code, setCode] = useState("")
+  const queries = [
+    "/demo/httpbin-get/1",
+    "/demo/demo-product/1",
+    "/demo/demo-offer/1",
+    "/demo/demo-sku/1",
+  ]
 
   return (
     <div>
       <div className="query-explorer__controls--wrapper">
-        <QueryControls />
+        <QueryControls queries={queries} />
       </div>
       <div className="query-explorer__input-output--wrapper">
         <Editor className="query-explorer__editor" code={"from cart"} onChange={setCode} />

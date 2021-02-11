@@ -1,15 +1,49 @@
 
+import { useState } from "react";
+
 import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
-import Select from 'react-select';
+import Select, {components, InputActionMeta, InputProps} from 'react-select';
 
-function QueryControls() {
-  const queries = [
-    {value: "/demo/httpbin-get/1", label: "/demo/httpbin-get/1"},
-    {value: "/demo/demo-product/1", label: "/demo/demo-product/1"},
-    {value: "/demo/demo-offer/1", label: "/demo/demo-offer/1"},
-    {value: "/demo/demo-sku/1", label: "/demo/demo-sku/1"},
-  ]
+const disableNoOptionsMessage = () => null;
+const Input = (props: InputProps) => <components.Input {...props} isHidden={false} />;
+
+// Source: https://github.com/JedWatson/react-select/issues/1558#issuecomment-738880505
+function EditableSelect(props: any) {
+  const [option, setOption] = useState<{label: string, value: string} | null>();
+  const [inputValue, setInputValue] = useState("");
+
+  const onInputChange = (inputValue: string, { action }: InputActionMeta) => {
+    if (action === "input-change") {
+      setInputValue(inputValue);
+    }
+  };
+
+  const onChange = (option: {label: string, value: string} | null) => {
+    setOption(option);
+    setInputValue(option ? option.label : "");
+  };
+
+  return (
+    <Select
+      {...props}
+      value={option}
+      inputValue={inputValue}
+      onInputChange={onInputChange}
+      onChange={onChange}
+      controlShouldRenderValue={false}
+      components={{Input}}
+      noOptionsMessage={disableNoOptionsMessage}
+    />
+  );
+}
+
+type QueryControlsProps = {
+  queries: string[]
+}
+
+function QueryControls(props: QueryControlsProps) {
+  const options = props.queries.map(q => ({value: q, label: q}))
 
   return (
     <header className="query-controls">
@@ -18,14 +52,14 @@ function QueryControls() {
       </div>
       <div className="query-controls__selector--wrapper">
         <p>{"/run-query"}</p>
-        <Select 
+        <EditableSelect 
           className="query-controls__selector" 
           classNamePrefix="query-controls__selector" 
-          options={queries} 
+          options={options} 
           escapeClearsValue={true}
           backspaceRemovesValue={true}
           isClearable={true}
-          placeholder={"Queries..."}
+          placeholder="Queries..."
         />
       </div>
       <div className="query-controls__actions--wrapper">
