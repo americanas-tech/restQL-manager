@@ -7,12 +7,14 @@ import './restql.js';
 type EditorProps = {
   className: string,
   code: string,
+  height: number,
+  width: number,
   onChange: (content: string) => void
 }
 
 
 function Editor(props: EditorProps) {
-  const { code, onChange, className } = props
+  const { code, onChange, height, width, className } = props
 
   return (
     <div className={className}>
@@ -24,6 +26,8 @@ function Editor(props: EditorProps) {
           mode: 'restql',
           lineWrapping: true,
         }}
+        height={height}
+        width={width}
         onChange={(instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList[]) => {
           onChange(instance.getDoc().getValue())
         }}
