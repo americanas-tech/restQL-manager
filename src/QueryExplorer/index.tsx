@@ -4,6 +4,7 @@ import './index.scss';
 import QueryControls from './query-controls';
 import QuerySelectors, {QueryInputMode} from './query-selectors';
 import Editor from './editor';
+import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view'
 
 const queries = [
@@ -108,7 +109,7 @@ const json = `
                           "blacknight-fevereiro2021",
                           "amais-in-fev",
                           "audiencia-casa",
-                          "tag-45vancouver",
+                          "tag-45vancouver"
                       ],
                       "weight": 6.0749326
                   },
@@ -202,7 +203,12 @@ function QueryExplorer() {
     "editor": <Editor className="query-explorer__editor" height={availableHeight} width={availableWidth}
                 code={"from cart"}
                 onChange={() => {}} />,
-    "params": <></>,
+    "params": <ParametersEditor 
+                height={availableHeight} 
+                width={availableWidth} 
+                params={[ {key: 'id', value: '122344565'}, 
+                          {key: 'opn', value: 'gatry'},
+                          {key: 'customerToken', value: '122344565'} ]} />,
   }
 
   return (

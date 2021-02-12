@@ -1,0 +1,86 @@
+@import 'assets/theme';
+
+.params-editor--wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  > h2 {
+    font-size: 1.2rem;
+    padding-left: 1.2rem;
+    color: darken($color: $gray, $amount: 30);
+  }
+}
+
+.params-editor {
+  max-height: 100%;
+  width: 100%;
+  overflow: scroll;
+  border-spacing: 0;
+
+  td,
+  th {
+    border: 1px solid lighten($color: $gray, $amount: 4);
+  }
+
+  th {
+    font-size: 1rem;
+    color: $dark-gray;
+    font-weight: 700;
+    padding: 0.8rem;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  td {
+    font-size: 1.2rem;
+    color: $dark-gray;
+    text-align: left;
+  }
+
+  tr > td:first-child {
+    text-align: right;
+  }
+}
+
+.params-editor__input {
+  border: none;
+  padding: 0.8rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.params-editor__input:focus {
+  outline: none;
+}
+
+.params-editor__input--enable {
+  width: 20px;
+  height: 20px;
+  width: 100%;
+  margin-right: 0.6rem;
+}
+
+.params-editor__input--value {
+  max-width: 90%;
+}
+
+.params-editor__input--delete {
+  opacity: 0;
+  width: 15px;
+  height: 15px;
+  fill: lighten($color: $dark-gray, $amount: 30);
+  cursor: pointer;
+}
+
+.params-editor--wrapper tr:hover .params-editor__input--delete {
+  opacity: 1;
+}
+
+.params-editor__input--new {
+  width: 100%;
+}
+
+.params-editor__input--disabled {
+  opacity: 0.3;
+}
