@@ -15,7 +15,9 @@
 .query-explorer__result {
   width: 100%;
   max-width: 100%;
-  resize: none;
+  max-height: 100%;
+  overflow: scroll;
+  padding: 0.8rem;
 }
 
 .query-inputs {
