@@ -206,9 +206,9 @@ function QueryExplorer() {
     "params": <ParametersEditor 
                 height={availableHeight} 
                 width={availableWidth} 
-                params={[ {key: 'id', value: '122344565'}, 
-                          {key: 'opn', value: 'gatry'},
-                          {key: 'customerToken', value: '122344565'} ]} />,
+                params={[ {key: 'id', value: '122344565', enabled: true}, 
+                          {key: 'opn', value: 'gatry', enabled: true},
+                          {key: 'customerToken', value: '122344565', enabled: true} ]} />,
   }
 
   return (

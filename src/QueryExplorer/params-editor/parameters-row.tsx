@@ -2,17 +2,40 @@
 import {FormEvent, useState} from 'react';
 import { ReactComponent as DeleteIcon } from './delete.svg';
 
+export type ParameterRowMode = "edit" | "insert";
+
 type ParameterRowProps = {
   paramKey: string,
   value: any,
   position: number,
-  onDelete: (key: string, position: number) => void
+  mode: ParameterRowMode,
+  onDelete: (key: string, position: number) => void,
+  onInsert: (key: string, value: any) => void
 }
 
 export function ParameterRow(props: ParameterRowProps) {
-  const { paramKey, value, position, onDelete } = props;
+  const { position, mode, onDelete } = props;
 
   const [enabled, setEnabled] = useState(true)
+  const [key, setKey] = useState(props.paramKey);
+  const [value, setValue] = useState<any>(props.value);
+
+  const keyHandler = (e: FormEvent<HTMLInputElement>) => {
+    const updatedKey = e.currentTarget.value;
+    setKey(updatedKey)
+    if (mode === "insert") {
+      props.onInsert(updatedKey, value);
+    }
+  }
+
+  const valueHandler = (e: FormEvent<HTMLInputElement>) => {
+    const updatedValue = e.currentTarget.value;
+    setValue(updatedValue)
+    if (mode === "insert") {
+      props.onInsert(key, updatedValue);
+    }
+  }
+
 
   const enableHandler = (e: FormEvent<HTMLInputElement>) => {
     setEnabled(e.currentTarget.checked);
@@ -21,69 +44,39 @@ export function ParameterRow(props: ParameterRowProps) {
   return (
     <tr className={enabled ? '' : 'params-editor__input--disabled'}>
       <td>
+        {mode === "edit" && (
+          <input 
+            className="params-editor__input params-editor__input--enable" 
+            type="checkbox" 
+            name="enable" 
+            checked={enabled} 
+            onChange={enableHandler} 
+          />
+        )}
+      </td>
+      <td>
         <input 
-          className="params-editor__input params-editor__input--enable" 
-          type="checkbox" 
-          name="enable" 
-          checked={enabled} 
-          onChange={enableHandler} 
+          className="params-editor__input" 
+          type="text" 
+          placeholder={mode === "insert" ? "Key" : ""}
+          value={key} 
+          onChange={keyHandler} 
         />
       </td>
       <td>
-        <input className="params-editor__input" type="text" value={paramKey} />
-      </td>
-      <td>
-        <input className="params-editor__input params-editor__input--value" type="text" value={value} />
-        <DeleteIcon onClick={() => onDelete(paramKey, position)} className="params-editor__input--delete" />
+        <input 
+          className="params-editor__input params-editor__input--value" 
+          type="text" 
+          placeholder={mode === "insert" ? "Value" : ""}
+          value={value} 
+          onChange={valueHandler} 
+        />
+        
+        {mode === "edit" && (
+          <DeleteIcon onClick={() => onDelete(key, position)} className="params-editor__input--delete" />
+        )}
       </td>
     </tr>
   )
 }
 
-type NewParameterRowProps = {
-  onNewParameter: (key: string, value: any) => void
-}
-
-export function NewParemeterRow(props: NewParameterRowProps) {
-  const [key, setKey] = useState("");
-  const [value, setValue] = useState<any>();
-
-  const clear = () => {
-    setKey("");
-    setValue("");
-  }
-
-  const keyHandler = (e: FormEvent<HTMLInputElement>) => {
-    props.onNewParameter(e.currentTarget.value, value);
-    clear();
-  }
-
-  const valueHandler = (e: FormEvent<HTMLInputElement>) => {
-    props.onNewParameter(key, e.currentTarget.value);
-    clear();
-  }
-
-  return (
-    <tr>
-      <td></td>
-      <td>
-        <input 
-          className="params-editor__input params-editor__input--new" 
-          type="text" 
-          placeholder="Key"
-          value={key}
-          onChange={keyHandler}
-        />
-      </td>
-      <td>
-        <input 
-          className="params-editor__input params-editor__input--new" 
-          type="text" 
-          placeholder="Value"
-          value={value}
-          onChange={valueHandler}
-        />
-      </td>
-    </tr>
-  )
-}

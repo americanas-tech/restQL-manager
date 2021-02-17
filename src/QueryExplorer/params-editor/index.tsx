@@ -2,7 +2,8 @@ import ParameterEditor from './parameter-editor.component'
 
 export type Param = {
   key: string,
-  value: any
+  value: any,
+  enabled: boolean
 }
 
 
