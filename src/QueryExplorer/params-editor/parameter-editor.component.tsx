@@ -1,32 +1,47 @@
-import {useState} from 'react';
+import { useMemo } from "react";
 import './index.scss';
 
-import { Param } from "./index";
-import {ParameterRow} from './parameters-row';
+import { Param, ChangedParameter, NewParam } from "../parameters";
+import {ParameterRow, ParameterRowMode} from './parameters-row';
 
 export type ParameterEditorProps = {
   height: number,
   width: number,
-  params: Param[]
-}
-
-const insertParamPlaceholder: Param = {key:"", value: null, enabled: true}
-
-const isParameterOnPosition = (keyToRemove: string, positionToRemove: number) => (param: Param, position: number) => {
-  return param.key === keyToRemove && position === positionToRemove;
+  params: Param[],
+  onChange: (change: ChangedParameter) => void
 }
 
 function ParameterEditor(props: ParameterEditorProps) {
-  const [parameters, setParameters] = useState(props.params)
-
-  const deleteParamHandler = (key: string, position: number) => {
-    const paramFilter = isParameterOnPosition(key, position);
-    const updatedParams = parameters.filter((p, i) => !paramFilter(p, i));
-
-    setParameters(updatedParams);
+  const deleteParamHandler = (param: Param) => {
+    props.onChange({type: "deleted", parameter: param});
   }
+
+  const insertHandler = (param: Param) => (key: string, value: any) => {
+    const newParam = {...param, key, value};
+    props.onChange({type: "inserted", parameter: newParam});
+  }
+
+  const changeHandler = (param: Param) => (key: string, value: any) => {
+    const updatedParam = {...param, key, value};
+    props.onChange({type: "edited", parameter: updatedParam});
+  }
+
+  const insertParamLinePlaceholder = NewParam("", "");
+  const lines: Param[] = [...props.params, insertParamLinePlaceholder];
+  const insertLineIndex = lines.length - 1;
   
-  const editorLines = [...parameters, insertParamPlaceholder];
+  const parameterRows = lines.map((p, i) => (
+    <ParameterRow 
+      key={p.id}
+      paramKey={p.key}
+      value={p.value}
+      enabled={p.enabled}
+      mode={i === insertLineIndex ? "insert" : "edit"}
+      onDelete={() => deleteParamHandler(p)}
+      onInsert={insertHandler(p)}
+      onChange={changeHandler(p)}
+    />
+  ));
 
   return (
     <div style={{height: props.height, width: props.width}} className="params-editor--wrapper">
@@ -41,17 +56,7 @@ function ParameterEditor(props: ParameterEditorProps) {
         </thead>
 
         <tbody>
-          {editorLines.map((p, i) => (
-            <ParameterRow 
-              key={`${p.key}-${i}`} 
-              position={i}
-              paramKey={p.key} 
-              value={p.value}
-              mode={i === editorLines.length-1 ? 'insert' : 'edit'}
-              onDelete={deleteParamHandler}
-              onInsert={(key, value) => setParameters([...parameters, {key, value, enabled: true}])}
-            />
-          ))}
+          {parameterRows}
         </tbody>
       </table>
     </div>

@@ -1,11 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useReducer, useMemo } from 'react';
 import './index.scss';
 
 import QueryControls from './query-controls';
 import QuerySelectors, {QueryInputMode} from './query-selectors';
 import Editor from './editor';
 import ParametersEditor from './params-editor';
-import JsonViewer from 'react-json-view'
+import JsonViewer from 'react-json-view';
+import { Param, ChangedParameter, NewParam } from "./parameters";
 
 const queries = [
   "/demo/httpbin-get/1",
@@ -175,6 +176,20 @@ const json = `
 }  
 `;
 
+
+const parametersReducer = (state: Param[], action: ChangedParameter): Param[] => {
+  switch (action.type) {
+    case "inserted":
+      return [...state, action.parameter];
+    case "deleted":
+      return state.filter((p) => p.id !== action.parameter.id);
+    case "edited":
+      return state.map(p => p.id === action.parameter.id ? action.parameter : p);
+    default:
+      return state;
+  }
+}
+
 function QueryExplorer() {
   const containerRef = useRef(null)
   const selectorsRef = useRef(null)
@@ -192,12 +207,17 @@ function QueryExplorer() {
       setAvailableHeight(height)
       setAvailableWidth(width)
     }
-  }, [containerRef, selectorsRef])
+  }, [containerRef, selectorsRef, resultsRef])
 
   const [mode, setMode] = useState<QueryInputMode>("editor")
   const [tenant, setTenant] = useState("")
   const [debug, setDebug] = useState(false)
   const [code, setCode] = useState("")
+  
+  const initialParams = [ NewParam('id', '122344565'),
+                          NewParam('opn', 'gatry'),
+                          NewParam('customerToken', '122344565') ];
+  const [params, dispatch] = useReducer(parametersReducer, initialParams);
 
   const modeToComponent: Record<QueryInputMode, JSX.Element> = {
     "editor": <Editor className="query-explorer__editor" height={availableHeight} width={availableWidth}
@@ -206,9 +226,8 @@ function QueryExplorer() {
     "params": <ParametersEditor 
                 height={availableHeight} 
                 width={availableWidth} 
-                params={[ {key: 'id', value: '122344565', enabled: true}, 
-                          {key: 'opn', value: 'gatry', enabled: true},
-                          {key: 'customerToken', value: '122344565', enabled: true} ]} />,
+                onChange={dispatch}
+                params={params} />,
   }
 
   return (
@@ -229,13 +248,15 @@ function QueryExplorer() {
           {modeToComponent[mode]}
         </div>
         <div ref={resultsRef} className="query-explorer__result">
-          <JsonViewer 
-            name={null} 
-            src={JSON.parse(json)} 
-            iconStyle={"triangle"} 
-            displayDataTypes={false} 
-            enableClipboard={true}
-          />
+          {useMemo(() => (
+            <JsonViewer 
+              name={null} 
+              src={JSON.parse(json)} 
+              iconStyle={"triangle"} 
+              displayDataTypes={false} 
+              enableClipboard={true}
+            />
+          ), [json])}
         </div>
       </div>
     </>

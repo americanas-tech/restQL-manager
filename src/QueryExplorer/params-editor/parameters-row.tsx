@@ -1,5 +1,5 @@
 
-import {FormEvent, useState} from 'react';
+import {FormEvent} from 'react';
 import { ReactComponent as DeleteIcon } from './delete.svg';
 
 export type ParameterRowMode = "edit" | "insert";
@@ -7,38 +7,40 @@ export type ParameterRowMode = "edit" | "insert";
 type ParameterRowProps = {
   paramKey: string,
   value: any,
-  position: number,
+  enabled: boolean,
   mode: ParameterRowMode,
-  onDelete: (key: string, position: number) => void,
-  onInsert: (key: string, value: any) => void
+  onDelete: () => void,
+  onInsert: (key: string, value: any) => void,
+  onChange: (key: string, value: any) => void,
 }
 
 export function ParameterRow(props: ParameterRowProps) {
-  const { position, mode, onDelete } = props;
+  const { mode, onDelete, paramKey: key, value, enabled } = props;
 
-  const [enabled, setEnabled] = useState(true)
-  const [key, setKey] = useState(props.paramKey);
-  const [value, setValue] = useState<any>(props.value);
+  const propagateChange = (key: string, value: any, enabled: boolean) => {
+    switch (mode) {
+      case "insert":
+        props.onInsert(key, value);
+        break;
+      case "edit":
+        props.onChange(key, value);
+        break;
+    }
+  }
 
   const keyHandler = (e: FormEvent<HTMLInputElement>) => {
     const updatedKey = e.currentTarget.value;
-    setKey(updatedKey)
-    if (mode === "insert") {
-      props.onInsert(updatedKey, value);
-    }
+    propagateChange(updatedKey, value, enabled);
   }
 
   const valueHandler = (e: FormEvent<HTMLInputElement>) => {
     const updatedValue = e.currentTarget.value;
-    setValue(updatedValue)
-    if (mode === "insert") {
-      props.onInsert(key, updatedValue);
-    }
+    propagateChange(key, updatedValue, enabled);
   }
 
-
   const enableHandler = (e: FormEvent<HTMLInputElement>) => {
-    setEnabled(e.currentTarget.checked);
+    const updatedEnabled = e.currentTarget.checked;
+    propagateChange(key, value, updatedEnabled);
   }
   
   return (
@@ -73,7 +75,7 @@ export function ParameterRow(props: ParameterRowProps) {
         />
         
         {mode === "edit" && (
-          <DeleteIcon onClick={() => onDelete(key, position)} className="params-editor__input--delete" />
+          <DeleteIcon onClick={() => onDelete()} className="params-editor__input--delete" />
         )}
       </td>
     </tr>
