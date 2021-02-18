@@ -50,7 +50,7 @@ function combineOptionAndParams(option: string, input: string): string {
 
 const queryTargetRegex = /\/([^?/]*)/gm; 
 
-const filterOption = (candidate: {label: string, value: string, data: any}, input: string) => {
+const filterOption = (candidate: {label: string, value: string, data: any}, input: string): boolean => {
   const matches = input.match(queryTargetRegex) || [];
   if (matches.length >= 2) {
     const namespacedQuery = `${matches[0]}${matches[1]}`

@@ -1,8 +1,7 @@
-import { useMemo } from "react";
 import './index.scss';
 
 import { Param, ChangedParameter, NewParam } from "../parameters";
-import {ParameterRow, ParameterRowMode} from './parameters-row';
+import {ParameterRow} from './parameters-row';
 
 export type ParameterEditorProps = {
   height: number,

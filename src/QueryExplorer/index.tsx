@@ -6,7 +6,13 @@ import QuerySelectors, {QueryInputMode} from './query-selectors';
 import Editor from './editor';
 import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
-import { Param, ChangedParameter, NewParam } from "./parameters";
+import { parametersReducer, NewParam } from "./parameters";
+import { 
+  QueryExplorerProvider, 
+  useQueryExplorerState, 
+  useQueryExplorerDispatch, 
+  initializeExplorer 
+} from "./explorer.context";
 
 const queries = [
   "/demo/httpbin-get/1",
@@ -176,21 +182,13 @@ const json = `
 }  
 `;
 
-
-const parametersReducer = (state: Param[], action: ChangedParameter): Param[] => {
-  switch (action.type) {
-    case "inserted":
-      return [...state, action.parameter];
-    case "deleted":
-      return state.filter((p) => p.id !== action.parameter.id);
-    case "edited":
-      return state.map(p => p.id === action.parameter.id ? action.parameter : p);
-    default:
-      return state;
-  }
-}
-
 function QueryExplorer() {
+  const queryExplorerDispatch = useQueryExplorerDispatch();
+  useEffect(() => {
+    initializeExplorer(queryExplorerDispatch);
+  }, []);
+
+  
   const containerRef = useRef(null)
   const selectorsRef = useRef(null)
   const resultsRef = useRef(null)
@@ -209,8 +207,9 @@ function QueryExplorer() {
     }
   }, [containerRef, selectorsRef, resultsRef])
 
+  const queryExplorerState = useQueryExplorerState();
   const [mode, setMode] = useState<QueryInputMode>("editor")
-  const [tenant, setTenant] = useState("")
+  const [tenantSelected, selectTenant] = useState(queryExplorerState.tenants[0])
   const [debug, setDebug] = useState(false)
   const [code, setCode] = useState("")
   
@@ -222,45 +221,53 @@ function QueryExplorer() {
   const modeToComponent: Record<QueryInputMode, JSX.Element> = {
     "editor": <Editor className="query-explorer__editor" height={availableHeight} width={availableWidth}
                 code={"from cart"}
-                onChange={() => {}} />,
-    "params": <ParametersEditor 
-                height={availableHeight} 
-                width={availableWidth} 
+                onChange={setCode} />,
+    "params": <ParametersEditor
+                height={availableHeight}
+                width={availableWidth}
                 onChange={dispatch}
                 params={params} />,
   }
 
   return (
     <>
-      <div className="query-explorer__controls--wrapper">
-        <QueryControls queries={queries} />
-      </div>
-      <div ref={containerRef} className="query-explorer__input-output--wrapper">
-        <div className="query-inputs">
-          <div ref={selectorsRef} className="query-inputs__selectors">
-            <QuerySelectors 
-              tenants={tenants} 
-              onModeChange={setMode} 
-              onTenantChange={setTenant}
-              onDebugChange={setDebug}
-            />
+        <div className="query-explorer__controls--wrapper">
+          <QueryControls queries={[]} />
+        </div>
+        <div ref={containerRef} className="query-explorer__input-output--wrapper">
+          <div className="query-inputs">
+            <div ref={selectorsRef} className="query-inputs__selectors">
+              <QuerySelectors 
+                tenants={queryExplorerState.tenants} 
+                onModeChange={setMode} 
+                onTenantChange={selectTenant}
+                onDebugChange={setDebug}
+              />
+            </div>
+            {modeToComponent[mode]}
           </div>
-          {modeToComponent[mode]}
+          <div ref={resultsRef} className="query-explorer__result">
+            {useMemo(() => (
+              <JsonViewer 
+                name={null} 
+                src={JSON.parse(json)} 
+                iconStyle={"triangle"} 
+                displayDataTypes={false} 
+                enableClipboard={true}
+              />
+            ), [json])}
+          </div>
         </div>
-        <div ref={resultsRef} className="query-explorer__result">
-          {useMemo(() => (
-            <JsonViewer 
-              name={null} 
-              src={JSON.parse(json)} 
-              iconStyle={"triangle"} 
-              displayDataTypes={false} 
-              enableClipboard={true}
-            />
-          ), [json])}
-        </div>
-      </div>
     </>
   )
 }
 
-export default QueryExplorer
+function QueryExplorerContainer() {
+  return (
+    <QueryExplorerProvider>
+      <QueryExplorer />
+    </QueryExplorerProvider>
+  )
+}
+
+export default QueryExplorerContainer
