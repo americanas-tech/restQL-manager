@@ -12,9 +12,6 @@ export async function fetchTenants(): Promise<string[]> {
     method: 'GET',
     baseURL: adminUrl,
     url: '/tenant',
-    headers: {
-      Authorization: 'Bearer restql-UQ8c',
-    }
   });
 
   const data = response.data as FetchTenantsResponse;
