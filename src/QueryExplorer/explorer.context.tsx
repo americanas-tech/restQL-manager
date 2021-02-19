@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { Query, QueryRevision } from "./queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants } from "../api";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, runQuery } from "../api";
+import { Param } from "./parameters";
 
 export type ExplorerState = {
   status: "initial" | "loading" | "completed" | "error",
@@ -9,8 +10,9 @@ export type ExplorerState = {
   queries: Record<string, Query[]>,
   selectedQuery: QueryRevision | null,
   selectedTenant: string,
-  queryText: string,
+  currentQueryText: string,
   debug: boolean,
+  queryResultJSON: any,
 }
 
 const initialState: ExplorerState = {
@@ -20,8 +22,9 @@ const initialState: ExplorerState = {
   queries: {},
   selectedQuery: null,
   selectedTenant: "",
-  queryText: "",
+  currentQueryText: "",
   debug: false,
+  queryResultJSON: {},
 }
 
 type ExplorerAction = 
@@ -32,6 +35,7 @@ type ExplorerAction =
   | {type: 'set_debug', debug: boolean}
   | {type: 'updated_query_text', text: string}
   | {type: 'select_tenant', tenant: string}
+  | {type: 'set_query_result', result: any}
   
 type Dispatch = React.Dispatch<ExplorerAction>;
 
@@ -53,13 +57,15 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
         selectedTenant: action.tenants[0],
       };
     case 'select_query':
-      return {...state, selectedQuery: action.queryRevision, queryText: action.queryRevision.text};
+      return {...state, selectedQuery: action.queryRevision, currentQueryText: action.queryRevision.text};
     case 'set_debug':
       return {...state, debug: action.debug};
     case 'updated_query_text':
-      return {...state, queryText: action.text};
+      return {...state, currentQueryText: action.text};
     case 'select_tenant':
       return {...state, selectedTenant: action.tenant};
+    case 'set_query_result':
+      return {...state, queryResultJSON: action.result};
     default:
       return state;
   }
@@ -107,4 +113,23 @@ export async function initializeExplorer(dispatch: Dispatch) {
   }
 
   dispatch({type: "initialization_completed", tenants: tenants, queries: queriesByNamespace});
+}
+
+export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState, params: Param[]): Promise<void> {
+  const inputParams = params
+    .filter(p => p.enabled)
+    .reduce((queryParams: Record<string, any>, p: Param) => {
+      if (p.key in queryParams) {
+        const listParam = [queryParams[p.key], p.value].flatMap(x => x);
+        return {...queryParams, [p.key]: listParam};
+      }
+
+      return {...queryParams, [p.key]: p.value};
+    }, {});
+
+    const queryParams = {...inputParams, tenant: state.selectedTenant, "_debug": state.debug};
+    const queryText = state.currentQueryText;
+
+    const result = await runQuery(queryText, queryParams);
+    dispatch({type:'set_query_result', result: result});
 }

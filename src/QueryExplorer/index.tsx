@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from 'react';
+import { useState, useEffect, useReducer, useMemo, useCallback } from 'react';
 import './index.scss';
 
 import QueryControls from './query-controls';
@@ -11,7 +11,8 @@ import {
   QueryExplorerProvider, 
   useQueryExplorerState, 
   useQueryExplorerDispatch, 
-  initializeExplorer 
+  initializeExplorer,
+  runExplorerQuery,
 } from "./explorer.context";
 import { QueryRevision } from './queries';
 
@@ -218,12 +219,12 @@ function QueryExplorer() {
   const jsonViewer = useMemo(() => (
     <JsonViewer 
       name={null} 
-      src={JSON.parse(json)} 
+      src={queryExplorerState.queryResultJSON} 
       iconStyle={"triangle"} 
       displayDataTypes={false} 
       enableClipboard={true}
     />
-  ), [json]);
+  ), [queryExplorerState.queryResultJSON]);
 
   if (queryExplorerState.status !== 'completed') {
     return <div>Loading...</div>;
@@ -233,7 +234,7 @@ function QueryExplorer() {
     "editor": <Editor className="query-explorer__editor" 
                 height={availableHeight} 
                 width={availableWidth}
-                content={queryExplorerState.queryText}
+                content={queryExplorerState.currentQueryText}
                 onChange={(content: string) => queryExplorerDispatch({type: 'updated_query_text', text: content})} />,
     "params": <ParametersEditor
                 height={availableHeight}
@@ -245,7 +246,7 @@ function QueryExplorer() {
   return (
     <>
         <div className="query-explorer__controls--wrapper">
-          <QueryControls params={params} onChange={queryControlChangeHandler} />
+          <QueryControls params={params} onChange={queryControlChangeHandler} onRun={() => runExplorerQuery(queryExplorerDispatch, queryExplorerState, params)} />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
           <div className="query-inputs">

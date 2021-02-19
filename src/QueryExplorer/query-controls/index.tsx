@@ -145,6 +145,7 @@ const disableNoOptionsMessage = () => null;
 type QueryControlsProps = {
   params: Param[],
   onChange: (query: QueryRevision, params: Param[]) => void,
+  onRun: () => void,
 }
 
 function QueryControls(props: QueryControlsProps) {
@@ -168,7 +169,7 @@ function QueryControls(props: QueryControlsProps) {
         />
       </div>
       <div className="query-controls__actions--wrapper">
-        <button>Run</button>
+        <button onClick={props.onRun}>Run</button>
         <button>Save</button>
       </div>
     </header>

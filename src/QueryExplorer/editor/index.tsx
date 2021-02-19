@@ -43,7 +43,7 @@ function Editor(props: EditorProps) {
 function allChangesAreFromInput(changes: CodeMirror.EditorChangeLinkedList): boolean {
   let change: CodeMirror.EditorChangeLinkedList | null = changes;
   do {
-    if (change.origin !== "+input" && change.origin !== "+delete") {
+    if (change.origin === "setValue") {
       return false
     }
 
