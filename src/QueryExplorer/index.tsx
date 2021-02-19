@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useReducer, useMemo } from 'react';
+import { useState, useRef, useEffect, useReducer, useMemo, useCallback } from 'react';
 import './index.scss';
 
 import QueryControls from './query-controls';
@@ -6,13 +6,14 @@ import QuerySelectors, {QueryInputMode} from './query-selectors';
 import Editor from './editor';
 import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
-import { parametersReducer, NewParam } from "./parameters";
+import { parametersReducer, Param } from "./parameters";
 import { 
   QueryExplorerProvider, 
   useQueryExplorerState, 
   useQueryExplorerDispatch, 
   initializeExplorer 
 } from "./explorer.context";
+import { QueryRevision } from './queries';
 
 const json = `
 {
@@ -168,44 +169,65 @@ const json = `
 }  
 `;
 
+const useElementDimensions = (defaultHeight: number, defaultWidth: number): [number, number, any] => {
+  const [height, setHeight] = useState(defaultHeight || 0);
+  const [width, setWidth] = useState(defaultWidth || 0);
+
+  const measuredContainer = useCallback(node => {
+    if (node !== null) {
+      setWidth(node.getBoundingClientRect().width);
+      setHeight(node.getBoundingClientRect().height);
+    }
+  }, []);
+
+  return [width, height, measuredContainer]
+}
+
 function QueryExplorer() {
   const queryExplorerState = useQueryExplorerState();
   const queryExplorerDispatch = useQueryExplorerDispatch();
   useEffect(() => {
     initializeExplorer(queryExplorerDispatch);
   }, []);
-  
-  const containerRef = useRef(null)
-  const selectorsRef = useRef(null)
-  const resultsRef = useRef(null)
 
-  const [availableHeight, setAvailableHeight] = useState(0)
-  const [availableWidth, setAvailableWidth] = useState(0)
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const [availableWidth, setAvailableWidth] = useState(0);
+
+  const [containerWidth, containerHeight, containerRef] = useElementDimensions(0, 0);
+  const [,selectorsHeight, selectorsRef] = useElementDimensions(0, 0);
+  const [resultsWidth,, resultsRef] = useElementDimensions(0, 0);
 
   useEffect(() => {
-    if (Boolean(containerRef.current) && Boolean(selectorsRef.current) && Boolean(resultsRef.current)) {
-      const height = (containerRef.current as any).offsetHeight - (selectorsRef.current as any).offsetHeight
-      const width = (containerRef.current as any).offsetWidth - (resultsRef.current as any).offsetWidth
+    const height = containerHeight - selectorsHeight;
+    setAvailableHeight(height);
+  }, [containerHeight, selectorsHeight]);
 
+  useEffect(() => {
+    const width = containerWidth - resultsWidth;
+    setAvailableWidth(width);
+  }, [containerWidth, resultsWidth]);
 
-      setAvailableHeight(height)
-      setAvailableWidth(width)
-    }
-  }, [containerRef.current, selectorsRef.current, resultsRef.current])
-
-  const [mode, setMode] = useState<QueryInputMode>("editor")
-  const [tenantSelected, selectTenant] = useState(queryExplorerState.tenants[0])
-  const [debug, setDebug] = useState(false)
-  const [code, setCode] = useState("")
+  const [mode, setMode] = useState<QueryInputMode>("editor");
+  const [tenantSelected, selectTenant] = useState(queryExplorerState.tenants[0]);
+  const [debug, setDebug] = useState(false);
   
-  // const initialParams = [ NewParam('id', '122344565'),
-  //                         NewParam('opn', 'gatry'),
-  //                         NewParam('customerToken', '122344565') ];
+  const [code, setCode] = useState(queryExplorerState.selectedQuery?.text || null);
+  useEffect(() => {
+    setCode(queryExplorerState.selectedQuery?.text || null);
+  }, [queryExplorerState.selectedQuery?.text])
+
   const [params, paramsDispatch] = useReducer(parametersReducer, []);
 
+  const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
+    paramsDispatch({type:'replaced', parameters: params});
+    queryExplorerDispatch({type: "select_query", queryRevision: qr});
+  }
+
   const modeToComponent: Record<QueryInputMode, JSX.Element> = {
-    "editor": <Editor className="query-explorer__editor" height={availableHeight} width={availableWidth}
-                code={"from cart"}
+    "editor": <Editor className="query-explorer__editor" 
+                height={availableHeight} 
+                width={availableWidth}
+                code={code}
                 onChange={setCode} />,
     "params": <ParametersEditor
                 height={availableHeight}
@@ -224,7 +246,6 @@ function QueryExplorer() {
     />
   ), [json]);
 
-
   if (queryExplorerState.status !== 'completed') {
     return <div>Loading...</div>;
   }
@@ -232,7 +253,7 @@ function QueryExplorer() {
   return (
     <>
         <div className="query-explorer__controls--wrapper">
-          <QueryControls params={params} onChange={(qr, params) => paramsDispatch({type:'replaced', parameters: params})} />
+          <QueryControls params={params} onChange={queryControlChangeHandler} />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
           <div className="query-inputs">

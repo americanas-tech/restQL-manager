@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
-import { Query } from "./queries";
+import { Query, QueryRevision } from "./queries";
 import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants } from "../api";
 
 export type ExplorerState = {
@@ -7,7 +7,7 @@ export type ExplorerState = {
   tenants: string[],
   namespaces: string[],
   queries: Record<string, Query[]>,
-  selectedQuery: Query | null,
+  selectedQuery: QueryRevision | null,
 }
 
 const initialState: ExplorerState = {
@@ -22,7 +22,7 @@ type ExplorerAction =
   {type: 'set_tenants', tenants: string[]}
   | {type: 'set_namespaces', namespaces: string[]}
   | {type: 'set_queries', queries: Record<string, Query[]>}
-  | {type: 'select_query', query: Query}
+  | {type: 'select_query', queryRevision: QueryRevision}
   | {type: 'initialization_started'}
   | {type: 'initialization_completed', queries: Record<string, Query[]>, tenants: string[]}
 
@@ -41,7 +41,7 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
     case 'set_namespaces':
       return {...state, tenants: action.namespaces};
     case 'select_query':
-      return {...state, selectedQuery: action.query};
+      return {...state, selectedQuery: action.queryRevision};
     case 'initialization_started':
       return {...state, status: 'loading'};
     case 'initialization_completed':

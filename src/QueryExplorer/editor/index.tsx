@@ -6,7 +6,7 @@ import './restql.js';
 
 type EditorProps = {
   className: string,
-  code: string,
+  code: string | null,
   height: number,
   width: number,
   onChange: (content: string) => void
@@ -19,7 +19,7 @@ function Editor(props: EditorProps) {
   return (
     <div className={className}>
       <CodeMirrorEditor
-        value={code}
+        value={code || ""}
         options={{
           theme: 'eclipse',
           keyMap: 'sublime',

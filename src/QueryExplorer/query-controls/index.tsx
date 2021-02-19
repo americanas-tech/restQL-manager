@@ -16,7 +16,7 @@ type option = {
 const Input = (props: InputProps) => <components.Input {...props} isHidden={false} />;
 
 type EditableSelect = {
-  selectedQuery: Query | null,
+  selectedQuery: QueryRevision | null,
   options: option[],
   defaultOption: option | null,
   params: Param[],
@@ -26,10 +26,11 @@ type EditableSelect = {
 // Source: https://github.com/JedWatson/react-select/issues/1558#issuecomment-738880505
 function EditableSelect(props: EditableSelect) {
   const [option, setOption] = useState<option | null>(props.defaultOption);
+  
   const enabledParams = props.params.filter(p => p.enabled);
+  const queryParams = stringifyParams(enabledParams);
 
   const defaultOptionLabel = props.defaultOption?.label || "";
-  const queryParams = stringifyParams(enabledParams);
   const defaultInputValue = Boolean(queryParams) ? `${defaultOptionLabel}?${queryParams}` : defaultOptionLabel;
   const [inputValue, setInputValue] = useState(defaultInputValue);
 
@@ -48,14 +49,16 @@ function EditableSelect(props: EditableSelect) {
     }
     setInputValue(inputValue);
 
-    if (option) {
-      const originalParams = props.params;
-      const inputParams = parseParams(inputValue);
-      
-      const updatedParams = mergeParams(originalParams, inputParams);
-
-      props.onChange(option.value, updatedParams);
+    if (!option) {
+      return
     }
+
+    const originalParams = props.params;
+    const inputParams = parseParams(inputValue);
+    
+    const updatedParams = mergeParams(originalParams, inputParams);
+
+    props.onChange(option.value, updatedParams);
   };
 
   const onChange = (option: option | null) => {
@@ -67,6 +70,8 @@ function EditableSelect(props: EditableSelect) {
 
     const newInputValue = Boolean(queryParams) ? `${option.label}?${queryParams}` : option.label;
     setInputValue(newInputValue);
+
+    props.onChange(option.value, props.params);
   };
 
   const selectedNamespace = props.selectedQuery?.namespace || "";
@@ -191,7 +196,7 @@ function buildOptionFromQuery(q: Query, rev: {revision: number, text: string}): 
   }
 }
 
-function findSelectedQueryOption(options: option[], query: Query | null): option | null {
+function findSelectedQueryOption(options: option[], query: QueryRevision | null): option | null {
   if (!query) {
     return null;
   }
