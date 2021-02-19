@@ -6,7 +6,7 @@ import './restql.js';
 
 type EditorProps = {
   className: string,
-  code: string | null,
+  content: string | null,
   height: number,
   width: number,
   onChange: (content: string) => void
@@ -14,12 +14,12 @@ type EditorProps = {
 
 
 function Editor(props: EditorProps) {
-  const { code, onChange, height, width, className } = props
+  const { content, onChange, height, width, className } = props
 
   return (
     <div className={className}>
       <CodeMirrorEditor
-        value={code || ""}
+        value={content || ""}
         options={{
           theme: 'eclipse',
           keyMap: 'sublime',
@@ -28,12 +28,29 @@ function Editor(props: EditorProps) {
         }}
         height={height}
         width={width}
-        onChange={(instance: CodeMirror.Editor, change: CodeMirror.EditorChangeLinkedList[]) => {
-          onChange(instance.getDoc().getValue())
+        onChange={(instance: CodeMirror.Editor, changes: CodeMirror.EditorChangeLinkedList[]) => {
+          const linkedChanges = changes as unknown as CodeMirror.EditorChangeLinkedList;
+
+          if (allChangesAreFromInput(linkedChanges)) {
+            onChange(instance.getValue());
+          }
         }}
       />
     </div>
   )
+}
+
+function allChangesAreFromInput(changes: CodeMirror.EditorChangeLinkedList): boolean {
+  let change: CodeMirror.EditorChangeLinkedList | null = changes;
+  do {
+    if (change.origin !== "+input" && change.origin !== "+delete") {
+      return false
+    }
+
+    change = changes.next || null;
+  } while (change);
+
+  return true
 }
 
 export default Editor

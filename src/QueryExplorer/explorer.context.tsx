@@ -8,6 +8,9 @@ export type ExplorerState = {
   namespaces: string[],
   queries: Record<string, Query[]>,
   selectedQuery: QueryRevision | null,
+  selectedTenant: string,
+  queryText: string,
+  debug: boolean,
 }
 
 const initialState: ExplorerState = {
@@ -16,16 +19,19 @@ const initialState: ExplorerState = {
   namespaces: [],
   queries: {},
   selectedQuery: null,
+  selectedTenant: "",
+  queryText: "",
+  debug: false,
 }
 
 type ExplorerAction = 
-  {type: 'set_tenants', tenants: string[]}
+  {type: 'initialization_started'}
   | {type: 'set_namespaces', namespaces: string[]}
-  | {type: 'set_queries', queries: Record<string, Query[]>}
-  | {type: 'select_query', queryRevision: QueryRevision}
-  | {type: 'initialization_started'}
   | {type: 'initialization_completed', queries: Record<string, Query[]>, tenants: string[]}
-
+  | {type: 'select_query', queryRevision: QueryRevision}
+  | {type: 'set_debug', debug: boolean}
+  | {type: 'updated_query_text', text: string}
+  | {type: 'select_tenant', tenant: string}
   
 type Dispatch = React.Dispatch<ExplorerAction>;
 
@@ -34,18 +40,26 @@ const QueryExplorerDispatchContext = createContext<Dispatch | null>(null);
 
 function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): ExplorerState {
   switch (action.type) {
-    case 'set_tenants':
-      return {...state, tenants: action.tenants};
-    case 'set_queries':
-      return {...state, queries: action.queries};
-    case 'set_namespaces':
-      return {...state, tenants: action.namespaces};
-    case 'select_query':
-      return {...state, selectedQuery: action.queryRevision};
     case 'initialization_started':
       return {...state, status: 'loading'};
+    case 'set_namespaces':
+      return {...state, tenants: action.namespaces};
     case 'initialization_completed':
-      return {...state, status: 'completed', tenants: action.tenants, queries: action.queries};
+      return {
+        ...state, 
+        status: 'completed', 
+        tenants: action.tenants, 
+        queries: action.queries,
+        selectedTenant: action.tenants[0],
+      };
+    case 'select_query':
+      return {...state, selectedQuery: action.queryRevision, queryText: action.queryRevision.text};
+    case 'set_debug':
+      return {...state, debug: action.debug};
+    case 'updated_query_text':
+      return {...state, queryText: action.text};
+    case 'select_tenant':
+      return {...state, selectedTenant: action.tenant};
     default:
       return state;
   }
@@ -81,11 +95,9 @@ export function useQueryExplorerDispatch(): Dispatch {
 }
 
 export async function initializeExplorer(dispatch: Dispatch) {
-  // dispatch({type: "select_query", query: {namespace: "checkout-app-bff", name: "TICKET__cart-summary", revisions: [{text: "from cart", revision: 1}, {text: "from cart", revision: 2}, {text: "from cart", revision: 3}, {text: "from cart", revision: 4}]}});
-  const tenants = await fetchTenants();
-
   dispatch({type: "initialization_started"});
 
+  const tenants = await fetchTenants();
   const namespaces = await fetchNamespaces();
   const queriesForNamespace = await Promise.all(namespaces.map(n => fetchQueriesFromNamespace(n)))
   

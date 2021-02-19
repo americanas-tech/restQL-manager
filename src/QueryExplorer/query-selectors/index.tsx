@@ -1,4 +1,4 @@
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 
 import './index.scss';
 
@@ -16,7 +16,8 @@ type QuerySelectorsProps = {
 
 function QuerySelector(props: QuerySelectorsProps) {
   const modeSelectorHandler = (e: FormEvent<HTMLSelectElement>) => {
-    props.onModeChange(e.currentTarget.value as QueryInputMode)
+    const newMode = e.currentTarget.value as QueryInputMode;
+    props.onModeChange(newMode)
   }
 
   const tenantSelectorHandler = (e: FormEvent<HTMLSelectElement>) => {

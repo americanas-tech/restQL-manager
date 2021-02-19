@@ -208,32 +208,11 @@ function QueryExplorer() {
   }, [containerWidth, resultsWidth]);
 
   const [mode, setMode] = useState<QueryInputMode>("editor");
-  const [tenantSelected, selectTenant] = useState(queryExplorerState.tenants[0]);
-  const [debug, setDebug] = useState(false);
-  
-  const [code, setCode] = useState(queryExplorerState.selectedQuery?.text || null);
-  useEffect(() => {
-    setCode(queryExplorerState.selectedQuery?.text || null);
-  }, [queryExplorerState.selectedQuery?.text])
-
   const [params, paramsDispatch] = useReducer(parametersReducer, []);
 
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
     queryExplorerDispatch({type: "select_query", queryRevision: qr});
-  }
-
-  const modeToComponent: Record<QueryInputMode, JSX.Element> = {
-    "editor": <Editor className="query-explorer__editor" 
-                height={availableHeight} 
-                width={availableWidth}
-                code={code}
-                onChange={setCode} />,
-    "params": <ParametersEditor
-                height={availableHeight}
-                width={availableWidth}
-                onChange={paramsDispatch}
-                params={params} />,
   }
 
   const jsonViewer = useMemo(() => (
@@ -250,6 +229,19 @@ function QueryExplorer() {
     return <div>Loading...</div>;
   }
 
+  const modeToComponent: Record<QueryInputMode, JSX.Element> = {
+    "editor": <Editor className="query-explorer__editor" 
+                height={availableHeight} 
+                width={availableWidth}
+                content={queryExplorerState.queryText}
+                onChange={(content: string) => queryExplorerDispatch({type: 'updated_query_text', text: content})} />,
+    "params": <ParametersEditor
+                height={availableHeight}
+                width={availableWidth}
+                onChange={paramsDispatch}
+                params={params} />,
+  }
+
   return (
     <>
         <div className="query-explorer__controls--wrapper">
@@ -261,11 +253,14 @@ function QueryExplorer() {
               <QuerySelectors 
                 tenants={queryExplorerState.tenants} 
                 onModeChange={setMode} 
-                onTenantChange={selectTenant}
-                onDebugChange={setDebug}
+                onTenantChange={(tenant) => queryExplorerDispatch({type: 'select_tenant', tenant: tenant})}
+                onDebugChange={(debug) => queryExplorerDispatch({type: 'set_debug', debug: debug})}
               />
             </div>
-            {modeToComponent[mode]}
+
+            {
+              modeToComponent[mode]
+            }
           </div>
           <div ref={resultsRef} className="query-explorer__result">
             {jsonViewer}
