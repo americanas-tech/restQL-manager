@@ -17,7 +17,9 @@ export function NewParam(key: string, value: any): Param {
   return {id: uuidv4(), key: key, value: value, enabled: true}
 }
 
-export type ChangedParameter = {type: "inserted" | "edited" | "deleted", parameter: Param}
+export type ChangedParameter = 
+  {type: "inserted" | "edited" | "deleted" , parameter: Param}
+  | {type: "replaced", parameters: Param[]}
 
 
 export const parametersReducer = (state: Param[], action: ChangedParameter): Param[] => {
@@ -28,7 +30,32 @@ export const parametersReducer = (state: Param[], action: ChangedParameter): Par
       return state.filter((p) => p.id !== action.parameter.id);
     case "edited":
       return state.map(p => p.id === action.parameter.id ? action.parameter : p);
+    case 'replaced':
+      return action.parameters;
     default:
       return state;
   }
+}
+
+export function stringifyParams(params: Param[]): string {
+  return params
+    .filter(p => Boolean(p.key) && Boolean(p.value))
+    .map(p => `${p.key}=${p.value}`)
+    .join('&');
+}
+
+export function parseParams(s: string): Param[] {
+  if (!s) {
+    return [];
+  }
+
+  const [_, params] = s.split('?');
+
+  if (!params) {
+    return [];
+  }
+
+  return params.split('&')
+    .map(kv => kv.split(/=(.+)?/, 2))
+    .map(([key, value]) => NewParam(key, value));
 }

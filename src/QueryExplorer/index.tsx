@@ -14,20 +14,6 @@ import {
   initializeExplorer 
 } from "./explorer.context";
 
-const queries = [
-  "/demo/httpbin-get/1",
-  "/demo/httpbin-get/2",
-  "/demo/httpbin-get/3",
-  "/demo/demo-product/1",
-  "/demo/demo-offer/1",
-  "/demo/demo-sku/1",
-]
-const tenants = [
-  "ACOM-PF",
-  "ACOM-NPF",
-  "SUBA-NPF",
-]
-
 const json = `
 {
   "cart": {
@@ -183,11 +169,11 @@ const json = `
 `;
 
 function QueryExplorer() {
+  const queryExplorerState = useQueryExplorerState();
   const queryExplorerDispatch = useQueryExplorerDispatch();
   useEffect(() => {
     initializeExplorer(queryExplorerDispatch);
   }, []);
-
   
   const containerRef = useRef(null)
   const selectorsRef = useRef(null)
@@ -205,18 +191,17 @@ function QueryExplorer() {
       setAvailableHeight(height)
       setAvailableWidth(width)
     }
-  }, [containerRef, selectorsRef, resultsRef])
+  }, [containerRef.current, selectorsRef.current, resultsRef.current])
 
-  const queryExplorerState = useQueryExplorerState();
   const [mode, setMode] = useState<QueryInputMode>("editor")
   const [tenantSelected, selectTenant] = useState(queryExplorerState.tenants[0])
   const [debug, setDebug] = useState(false)
   const [code, setCode] = useState("")
   
-  const initialParams = [ NewParam('id', '122344565'),
-                          NewParam('opn', 'gatry'),
-                          NewParam('customerToken', '122344565') ];
-  const [params, dispatch] = useReducer(parametersReducer, initialParams);
+  // const initialParams = [ NewParam('id', '122344565'),
+  //                         NewParam('opn', 'gatry'),
+  //                         NewParam('customerToken', '122344565') ];
+  const [params, paramsDispatch] = useReducer(parametersReducer, []);
 
   const modeToComponent: Record<QueryInputMode, JSX.Element> = {
     "editor": <Editor className="query-explorer__editor" height={availableHeight} width={availableWidth}
@@ -225,14 +210,29 @@ function QueryExplorer() {
     "params": <ParametersEditor
                 height={availableHeight}
                 width={availableWidth}
-                onChange={dispatch}
+                onChange={paramsDispatch}
                 params={params} />,
+  }
+
+  const jsonViewer = useMemo(() => (
+    <JsonViewer 
+      name={null} 
+      src={JSON.parse(json)} 
+      iconStyle={"triangle"} 
+      displayDataTypes={false} 
+      enableClipboard={true}
+    />
+  ), [json]);
+
+
+  if (queryExplorerState.status !== 'completed') {
+    return <div>Loading...</div>;
   }
 
   return (
     <>
         <div className="query-explorer__controls--wrapper">
-          <QueryControls queries={[]} />
+          <QueryControls params={params} onChange={(qr, params) => paramsDispatch({type:'replaced', parameters: params})} />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
           <div className="query-inputs">
@@ -247,15 +247,7 @@ function QueryExplorer() {
             {modeToComponent[mode]}
           </div>
           <div ref={resultsRef} className="query-explorer__result">
-            {useMemo(() => (
-              <JsonViewer 
-                name={null} 
-                src={JSON.parse(json)} 
-                iconStyle={"triangle"} 
-                displayDataTypes={false} 
-                enableClipboard={true}
-              />
-            ), [json])}
+            {jsonViewer}
           </div>
         </div>
     </>

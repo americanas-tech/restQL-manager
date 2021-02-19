@@ -11,7 +11,7 @@ type ParameterRowProps = {
   mode: ParameterRowMode,
   onDelete: () => void,
   onInsert: (key: string, value: any) => void,
-  onChange: (key: string, value: any) => void,
+  onChange: (key: string, value: any, enabled: boolean) => void,
 }
 
 export function ParameterRow(props: ParameterRowProps) {
@@ -23,7 +23,7 @@ export function ParameterRow(props: ParameterRowProps) {
         props.onInsert(key, value);
         break;
       case "edit":
-        props.onChange(key, value);
+        props.onChange(key, value, enabled);
         break;
     }
   }

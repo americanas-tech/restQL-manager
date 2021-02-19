@@ -8,6 +8,13 @@ export type Query = {
   }[]
 }
 
-export function stringifyQueryRevision(query: Query, revision: number): string {
-  return `/${query.namespace}/${query.name}/${revision}`;
+export type QueryRevision = {
+  namespace: string,
+  name: string,
+  text: string,
+  revision: number
+}
+
+export function stringifyQueryRevision(queryRevision: QueryRevision): string {
+  return `/${queryRevision.namespace}/${queryRevision.name}/${queryRevision.revision}`;
 }

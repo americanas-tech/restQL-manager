@@ -1,7 +1,7 @@
 import './index.scss';
 
 import { Param, ChangedParameter, NewParam } from "../parameters";
-import {ParameterRow} from './parameters-row';
+import {ParameterRow} from './parameters-row.component';
 
 export type ParameterEditorProps = {
   height: number,
@@ -20,8 +20,8 @@ function ParameterEditor(props: ParameterEditorProps) {
     props.onChange({type: "inserted", parameter: newParam});
   }
 
-  const changeHandler = (param: Param) => (key: string, value: any) => {
-    const updatedParam = {...param, key, value};
+  const changeHandler = (param: Param) => (key: string, value: any, enabled: boolean) => {
+    const updatedParam = {...param, key, value, enabled};
     props.onChange({type: "edited", parameter: updatedParam});
   }
 

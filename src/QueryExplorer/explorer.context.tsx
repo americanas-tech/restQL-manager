@@ -2,31 +2,31 @@ import { createContext, ReactNode, useContext, useReducer } from "react";
 import { Query } from "./queries";
 import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants } from "../api";
 
-type ExplorerState = {
+export type ExplorerState = {
+  status: "initial" | "loading" | "completed" | "error",
   tenants: string[],
   namespaces: string[],
   queries: Record<string, Query[]>,
-  selections: {
-    namespace: string,
-    query: Query | null,
-  }
+  selectedQuery: Query | null,
 }
 
 const initialState: ExplorerState = {
+  status: "initial",
   tenants: [],
   namespaces: [],
   queries: {},
-  selections: {
-    namespace: "",
-    query: null,
-  },
+  selectedQuery: null,
 }
 
 type ExplorerAction = 
   {type: 'set_tenants', tenants: string[]}
   | {type: 'set_namespaces', namespaces: string[]}
   | {type: 'set_queries', queries: Record<string, Query[]>}
+  | {type: 'select_query', query: Query}
+  | {type: 'initialization_started'}
+  | {type: 'initialization_completed', queries: Record<string, Query[]>, tenants: string[]}
 
+  
 type Dispatch = React.Dispatch<ExplorerAction>;
 
 const QueryExplorerStateContext = createContext<ExplorerState | null>(null);
@@ -34,12 +34,18 @@ const QueryExplorerDispatchContext = createContext<Dispatch | null>(null);
 
 function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): ExplorerState {
   switch (action.type) {
-    case "set_tenants":
+    case 'set_tenants':
       return {...state, tenants: action.tenants};
     case 'set_queries':
       return {...state, queries: action.queries};
-    case "set_namespaces":
+    case 'set_namespaces':
       return {...state, tenants: action.namespaces};
+    case 'select_query':
+      return {...state, selectedQuery: action.query};
+    case 'initialization_started':
+      return {...state, status: 'loading'};
+    case 'initialization_completed':
+      return {...state, status: 'completed', tenants: action.tenants, queries: action.queries};
     default:
       return state;
   }
@@ -75,8 +81,10 @@ export function useQueryExplorerDispatch(): Dispatch {
 }
 
 export async function initializeExplorer(dispatch: Dispatch) {
+  // dispatch({type: "select_query", query: {namespace: "checkout-app-bff", name: "TICKET__cart-summary", revisions: [{text: "from cart", revision: 1}, {text: "from cart", revision: 2}, {text: "from cart", revision: 3}, {text: "from cart", revision: 4}]}});
   const tenants = await fetchTenants();
-  dispatch({type: "set_tenants", tenants: tenants});
+
+  dispatch({type: "initialization_started"});
 
   const namespaces = await fetchNamespaces();
   const queriesForNamespace = await Promise.all(namespaces.map(n => fetchQueriesFromNamespace(n)))
@@ -86,5 +94,5 @@ export async function initializeExplorer(dispatch: Dispatch) {
     queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
   }
 
-  dispatch({type: "set_queries", queries: queriesByNamespace});
+  dispatch({type: "initialization_completed", tenants: tenants, queries: queriesByNamespace});
 }
