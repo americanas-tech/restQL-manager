@@ -12,7 +12,10 @@ export type ExplorerState = {
   selectedTenant: string,
   currentQueryText: string,
   debug: boolean,
-  queryResultJSON: any,
+  queryResult: {
+    status: 'stale' | 'running',
+    json: any,
+  },
 }
 
 const initialState: ExplorerState = {
@@ -24,7 +27,10 @@ const initialState: ExplorerState = {
   selectedTenant: "",
   currentQueryText: "",
   debug: false,
-  queryResultJSON: {},
+  queryResult: {
+    status: 'stale',
+    json: {},
+  },
 }
 
 type ExplorerAction = 
@@ -35,7 +41,8 @@ type ExplorerAction =
   | {type: 'set_debug', debug: boolean}
   | {type: 'updated_query_text', text: string}
   | {type: 'select_tenant', tenant: string}
-  | {type: 'set_query_result', result: any}
+  | {type: 'query_execution_started'}
+  | {type: 'query_execution_finished', result: any}
   
 type Dispatch = React.Dispatch<ExplorerAction>;
 
@@ -47,12 +54,12 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
     case 'initialization_started':
       return {...state, status: 'loading'};
     case 'set_namespaces':
-      return {...state, tenants: action.namespaces};
+      return {...state, namespaces: action.namespaces.sort()};
     case 'initialization_completed':
       return {
         ...state, 
         status: 'completed', 
-        tenants: action.tenants, 
+        tenants: action.tenants.sort(), 
         queries: action.queries,
         selectedTenant: action.tenants[0],
       };
@@ -64,8 +71,13 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
       return {...state, currentQueryText: action.text};
     case 'select_tenant':
       return {...state, selectedTenant: action.tenant};
-    case 'set_query_result':
-      return {...state, queryResultJSON: action.result};
+    case 'query_execution_started':
+      return {...state, queryResult: {...state.queryResult, status: 'running'}};
+    case 'query_execution_finished':
+      return {...state, queryResult: {
+        status: 'stale',
+        json: action.result,
+      }};
     default:
       return state;
   }
@@ -116,6 +128,8 @@ export async function initializeExplorer(dispatch: Dispatch) {
 }
 
 export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState, params: Param[]): Promise<void> {
+  dispatch({type:'query_execution_started'});
+
   const inputParams = params
     .filter(p => p.enabled)
     .reduce((queryParams: Record<string, any>, p: Param) => {
@@ -127,9 +141,9 @@ export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState,
       return {...queryParams, [p.key]: p.value};
     }, {});
 
-    const queryParams = {...inputParams, tenant: state.selectedTenant, "_debug": state.debug};
-    const queryText = state.currentQueryText;
+  const queryParams = {...inputParams, tenant: state.selectedTenant, "_debug": state.debug};
+  const queryText = state.currentQueryText;
 
-    const result = await runQuery(queryText, queryParams);
-    dispatch({type:'set_query_result', result: result});
+  const result = await runQuery(queryText, queryParams);
+  dispatch({type:'query_execution_finished', result: result});
 }

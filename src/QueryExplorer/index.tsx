@@ -15,6 +15,7 @@ import {
   runExplorerQuery,
 } from "./explorer.context";
 import { QueryRevision } from './queries';
+import { relative } from 'path';
 
 const json = `
 {
@@ -216,15 +217,16 @@ function QueryExplorer() {
     queryExplorerDispatch({type: "select_query", queryRevision: qr});
   }
 
+  const queryResult = queryExplorerState.queryResult;
   const jsonViewer = useMemo(() => (
     <JsonViewer 
       name={null} 
-      src={queryExplorerState.queryResultJSON} 
+      src={queryResult.json} 
       iconStyle={"triangle"} 
       displayDataTypes={false} 
       enableClipboard={true}
     />
-  ), [queryExplorerState.queryResultJSON]);
+  ), [queryResult.json]);
 
   if (queryExplorerState.status !== 'completed') {
     return <div>Loading...</div>;
@@ -264,7 +266,11 @@ function QueryExplorer() {
             }
           </div>
           <div ref={resultsRef} className="query-explorer__result">
-            {jsonViewer}
+            <div style={{position: "relative", width: "100%", height: "100%"}}>
+              <div className={queryResult.status === 'stale' ? '' : 'query-explorer__result--running'}>
+                {jsonViewer}
+              </div>
+            </div>
           </div>
         </div>
     </>

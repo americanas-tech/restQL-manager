@@ -20,6 +20,22 @@
   padding: 0.8rem;
 }
 
+.query-explorer__result--running {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+  z-index: 2;
+
+  background-color: rgba($color: #eee, $alpha: 0.8);
+  background-image: url('./loading-spinner.svg');
+  background-size: 80px 80px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: scroll;
+}
+
 .query-inputs {
   width: 100%;
   max-width: 100%;
