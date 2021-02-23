@@ -78,4 +78,14 @@
   text-transform: uppercase;
   font-weight: 800;
   margin-right: 0.8rem;
+  cursor: pointer;
+}
+
+.query-controls button:focus {
+  outline: none;
+}
+
+.query-controls button:disabled {
+  cursor: not-allowed;
+  background-color: rgba($color: $secondary, $alpha: 0.5);
 }

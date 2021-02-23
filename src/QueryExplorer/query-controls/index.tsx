@@ -18,19 +18,19 @@ const Input = (props: InputProps) => <components.Input {...props} isHidden={fals
 type EditableSelect = {
   selectedQuery: QueryRevision | null,
   options: option[],
-  defaultOption: option | null,
   params: Param[],
   onChange: (query: QueryRevision, params: Param[]) => void,
 }
 
 // Source: https://github.com/JedWatson/react-select/issues/1558#issuecomment-738880505
 function EditableSelect(props: EditableSelect) {
-  const [option, setOption] = useState<option | null>(props.defaultOption);
+  const defaultOption = props.selectedQuery ? { label: stringifyQueryRevision(props.selectedQuery), value: props.selectedQuery} : null;
+  const [option, setOption] = useState<option | null>(defaultOption);
   
   const enabledParams = props.params.filter(p => p.enabled);
   const queryParams = stringifyParams(enabledParams);
 
-  const defaultOptionLabel = props.defaultOption?.label || "";
+  const defaultOptionLabel = defaultOption?.label || "";
   const defaultInputValue = Boolean(queryParams) ? `${defaultOptionLabel}?${queryParams}` : defaultOptionLabel;
   const [inputValue, setInputValue] = useState(defaultInputValue);
 
@@ -42,6 +42,16 @@ function EditableSelect(props: EditableSelect) {
     const newInputValue = Boolean(queryParams) ? `${option.label}?${queryParams}` : option.label;
     setInputValue(newInputValue);
   }, [queryParams]);
+
+  useEffect(() => {
+    if (props.selectedQuery) {
+      const label = stringifyQueryRevision(props.selectedQuery);
+      setOption({ label: label, value: props.selectedQuery});
+
+      const newInputValue = Boolean(queryParams) ? `${label}?${queryParams}` : label;
+      setInputValue(newInputValue);
+    }
+  }, [props.selectedQuery])
 
   const onInputChange = (inputValue: string, { action }: InputActionMeta) => {
     if (action !== "input-change") {
@@ -144,14 +154,15 @@ const disableNoOptionsMessage = () => null;
 
 type QueryControlsProps = {
   params: Param[],
+  disableActions: {run: boolean, save: boolean},
   onChange: (query: QueryRevision, params: Param[]) => void,
   onRun: () => void,
+  onSave: () => void,
 }
 
 function QueryControls(props: QueryControlsProps) {
   const {queries, selectedQuery} = useQueryExplorerState()
   const options = getOptions(queries);
-  const defaultOption = findSelectedQueryOption(options, selectedQuery);
 
   return (
     <header className="query-controls">
@@ -163,14 +174,13 @@ function QueryControls(props: QueryControlsProps) {
         <EditableSelect 
           options={options}
           selectedQuery={selectedQuery}
-          defaultOption={defaultOption}
           params={props.params}
           onChange={props.onChange}
         />
       </div>
       <div className="query-controls__actions--wrapper">
-        <button onClick={props.onRun}>Run</button>
-        <button>Save</button>
+        <button disabled={props.disableActions.run} onClick={props.onRun}>Run</button>
+        <button disabled={props.disableActions.save} onClick={props.onSave}>Save</button>
       </div>
     </header>
   )
@@ -195,24 +205,6 @@ function buildOptionFromQuery(q: Query, rev: {revision: number, text: string}): 
     value: qr,
     label: stringifyQueryRevision(qr)
   }
-}
-
-function findSelectedQueryOption(options: option[], query: QueryRevision | null): option | null {
-  if (!query) {
-    return null;
-  }
-
-  const queryOptions = options.filter(o => o.value.namespace === query?.namespace && o.value.name === query?.name);
-
-  const selectedOption = queryOptions.reduce((currentOption, selectedOption) => {
-    if (currentOption.value.revision > selectedOption.value.revision) {
-      return currentOption;
-    } else {
-      return selectedOption;
-    }
-  }, {label: "", value: {name: "", namespace: "", text: "", revision: 0}});
-
-  return selectedOption as option;
 }
 
 export default QueryControls

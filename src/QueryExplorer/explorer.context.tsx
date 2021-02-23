@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { Query, QueryRevision } from "./queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, runQuery } from "../api";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, runQuery, saveQuery } from "../api";
 import { Param } from "./parameters";
 
 export type ExplorerState = {
@@ -16,6 +16,10 @@ export type ExplorerState = {
     status: 'stale' | 'running',
     json: any,
   },
+  saveQueryModal: {
+    status: 'stale' | 'saving',
+    error: string
+  }
 }
 
 const initialState: ExplorerState = {
@@ -31,18 +35,25 @@ const initialState: ExplorerState = {
     status: 'stale',
     json: {},
   },
+  saveQueryModal: {
+    status: 'stale',
+    error: ''
+  }
 }
 
 type ExplorerAction = 
   {type: 'initialization_started'}
-  | {type: 'set_namespaces', namespaces: string[]}
   | {type: 'initialization_completed', queries: Record<string, Query[]>, tenants: string[]}
+  | {type: 'refresh_queries', queries: Record<string, Query[]>}
   | {type: 'select_query', queryRevision: QueryRevision}
   | {type: 'set_debug', debug: boolean}
   | {type: 'updated_query_text', text: string}
   | {type: 'select_tenant', tenant: string}
   | {type: 'query_execution_started'}
   | {type: 'query_execution_finished', result: any}
+  | {type: 'save_query_started'}
+  | {type: 'save_query_finished'}
+  | {type: 'save_query_failed', error: string}
   
 type Dispatch = React.Dispatch<ExplorerAction>;
 
@@ -53,15 +64,20 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
   switch (action.type) {
     case 'initialization_started':
       return {...state, status: 'loading'};
-    case 'set_namespaces':
-      return {...state, namespaces: action.namespaces.sort()};
     case 'initialization_completed':
       return {
         ...state, 
         status: 'completed', 
         tenants: action.tenants.sort(), 
         queries: action.queries,
+        namespaces: Object.keys(action.queries).sort(),
         selectedTenant: action.tenants[0],
+      };
+    case 'refresh_queries':
+      return {
+        ...state, 
+        queries: action.queries,
+        namespaces: Object.keys(action.queries).sort(),
       };
     case 'select_query':
       return {...state, selectedQuery: action.queryRevision, currentQueryText: action.queryRevision.text};
@@ -78,6 +94,12 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
         status: 'stale',
         json: action.result,
       }};
+    case 'save_query_started':
+      return {...state, saveQueryModal: {status: 'saving', error: ""}}
+    case 'save_query_finished':
+      return {...state, saveQueryModal: {status: 'stale', error: ""}}
+    case 'save_query_failed':
+      return {...state, saveQueryModal: {status: 'stale', error: action.error}}
     default:
       return state;
   }
@@ -116,13 +138,7 @@ export async function initializeExplorer(dispatch: Dispatch) {
   dispatch({type: "initialization_started"});
 
   const tenants = await fetchTenants();
-  const namespaces = await fetchNamespaces();
-  const queriesForNamespace = await Promise.all(namespaces.map(n => fetchQueriesFromNamespace(n)))
-  
-  const queriesByNamespace: Record<string, Query[]> = {};
-  for (const namespaceQueries of queriesForNamespace) {
-    queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
-  }
+  const queriesByNamespace = await fetchNamespacesAndQueries();
 
   dispatch({type: "initialization_completed", tenants: tenants, queries: queriesByNamespace});
 }
@@ -146,4 +162,50 @@ export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState,
 
   const result = await runQuery(queryText, queryParams);
   dispatch({type:'query_execution_finished', result: result});
+}
+
+export async function saveExplorerQuery(dispatch: Dispatch, state: ExplorerState, queryNamespace: string, queryName: string) {
+  dispatch({type:'save_query_started'});
+
+  const queryText = state.currentQueryText;
+  try {
+    await saveQuery(queryNamespace, queryName, queryText);
+    
+    const queriesByNamespace = await fetchNamespacesAndQueries();
+    dispatch({type:'refresh_queries', queries: queriesByNamespace});
+
+    const newRevision = getNewRevision(queriesByNamespace, queryNamespace, queryName);
+    dispatch({type: 'select_query', queryRevision: newRevision});
+    
+    dispatch({type:'save_query_finished'});
+  } catch (error) {
+    dispatch({type:'save_query_failed', error: error});
+  }
+}
+
+function getNewRevision(queriesByNamespace: Record<string, Query[]>, namespace: string, name: string): QueryRevision {
+  const namespacedQueries = queriesByNamespace[namespace];
+
+  const query = namespacedQueries.find(q => q.name === name) as Query;
+
+  const lastRevision = query.revisions[query.revisions.length-1];
+
+  return {
+    namespace: namespace,
+    name: name,
+    revision: lastRevision.revision,
+    text: lastRevision.text,
+  }
+}
+
+async function fetchNamespacesAndQueries() {
+  const namespaces = await fetchNamespaces();
+  const queriesForNamespace = await Promise.all(namespaces.map(n => fetchQueriesFromNamespace(n)))
+  
+  const queriesByNamespace: Record<string, Query[]> = {};
+  for (const namespaceQueries of queriesForNamespace) {
+    queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
+  }
+
+  return queriesByNamespace
 }

@@ -59,6 +59,22 @@ export async function fetchQueriesFromNamespace(namespace: string): Promise<Fetc
   return data;
 }
 
+export async function saveQuery(namespace: string, name: string, queryText: string) {
+  try {
+    await axios({
+      method: 'POST',
+      baseURL: adminUrl,
+      url: `/namespace/${namespace}/query/${name}`,
+      data: {text: queryText},
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
 export async function runQuery(text: string, params: Record<string, any>) {
   try {
     const response = await axios({
@@ -74,7 +90,6 @@ export async function runQuery(text: string, params: Record<string, any>) {
 
     return response.data
   } catch (error) {
-    console.log('failed to run query', error);
     return error.response.data;
   }
 }
