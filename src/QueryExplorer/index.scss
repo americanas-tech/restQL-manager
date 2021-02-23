@@ -48,6 +48,10 @@
 .query-explorer__editor {
   width: 100%;
   flex-grow: 1;
+
+  .CodeMirror * {
+    font-size: 1.3rem;
+  }
 }
 
 .query-inputs__selectors {
