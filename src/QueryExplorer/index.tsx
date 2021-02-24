@@ -7,6 +7,7 @@ import Editor from './editor';
 import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
 import SaveQueryModal from "./save-query";
+import SideMenuModal from './side-menu';
 import { parametersReducer, Param } from "./parameters";
 import { 
   QueryExplorerProvider, 
@@ -76,14 +77,21 @@ function QueryExplorer() {
     />
   ), [queryResult.json]);
 
-  const [modalOpen, setModalOpen] = useState(false);
-  const onCloseModal = () => {
-    setModalOpen(false);
-  }
+  const [saveQueryModalOpen, setSaveQueryModalOpen] = useState(false);
+  const closeSaveQueryModal = () => setSaveQueryModalOpen(false);
+  const openSaveQueryModal = () => setSaveQueryModalOpen(true);
   const onSaveQuery = async (namespace: string, name: string) => { 
     await saveExplorerQuery(queryExplorerDispatch, queryExplorerState, namespace, name)
-    setModalOpen(false);
+    setSaveQueryModalOpen(false);
   }
+
+
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
+  const openSideMenu = () => {
+    console.log('open side menu')
+    setSideMenuOpen(true)
+  };
+  const closeSideMenu = () => setSideMenuOpen(false);
 
   if (queryExplorerState.status !== 'completed') {
     return <div>Loading...</div>;
@@ -111,9 +119,10 @@ function QueryExplorer() {
               run: queryExplorerState.queryResult.status === 'running',
               save: !queryExplorerState.currentQueryText || queryExplorerState.queryResult.status === 'running',
             }}
+            onMenuOpen={openSideMenu}
             onChange={queryControlChangeHandler} 
             onRun={() => runExplorerQuery(queryExplorerDispatch, queryExplorerState, params)}
-            onSave={() => setModalOpen(true)}
+            onSave={openSaveQueryModal}
           />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
@@ -140,12 +149,18 @@ function QueryExplorer() {
           </div>
         </div>
         <SaveQueryModal 
-          isOpen={modalOpen} 
+          isOpen={saveQueryModalOpen} 
           status={queryExplorerState.saveQueryModal.status}
           selectedQuery={queryExplorerState.selectedQuery}
           errorMessage={queryExplorerState.saveQueryModal.error}
           onSave={onSaveQuery}
-          onClose={onCloseModal} 
+          onClose={closeSaveQueryModal} 
+        />
+        <SideMenuModal 
+          isOpen={sideMenuOpen}
+          queriesByNamespace={queryExplorerState.queries}
+          selectedQuery={queryExplorerState.selectedQuery}
+          onClose={closeSideMenu}
         />
     </>
   )

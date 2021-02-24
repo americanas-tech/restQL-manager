@@ -158,6 +158,7 @@ type QueryControlsProps = {
   onChange: (query: QueryRevision, params: Param[]) => void,
   onRun: () => void,
   onSave: () => void,
+  onMenuOpen: () => void
 }
 
 function QueryControls(props: QueryControlsProps) {
@@ -167,7 +168,7 @@ function QueryControls(props: QueryControlsProps) {
   return (
     <header className="query-controls">
       <div>
-        <MenuIcon className="query-controls__menu" />
+        <MenuIcon style={{cursor: 'pointer'}} onClick={props.onMenuOpen} className="query-controls__menu" />
       </div>
       <div className="query-controls__selector--wrapper">
         <p>{"/run-query"}</p>
