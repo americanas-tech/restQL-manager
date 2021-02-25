@@ -5,7 +5,7 @@ import { Query, QueryRevision } from "../queries";
 import QueryList from './query-list.component';
 import './index.scss';
 import ResourceList from "./resource-list.component";
-import { MappingsByTenant } from "../explorer.context";
+import { MappingsByTenant } from "../../manager.context";
 
 export type SideMenuModal = {
   isOpen: boolean,

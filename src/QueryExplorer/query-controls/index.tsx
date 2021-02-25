@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
 import Select, {components, InputActionMeta, InputProps} from 'react-select';
-import { useQueryExplorerState } from "../explorer.context";
+import { useManagerState } from "../../manager.context";
 import { Query, QueryRevision, stringifyQueryRevision } from "../queries";
 import { Param, parseParams, stringifyParams } from "../parameters";
 
@@ -162,7 +162,7 @@ type QueryControlsProps = {
 }
 
 function QueryControls(props: QueryControlsProps) {
-  const {queries, selectedQuery} = useQueryExplorerState()
+  const {queries, selectedQuery} = useManagerState()
   const options = getOptions(queries);
 
   return (

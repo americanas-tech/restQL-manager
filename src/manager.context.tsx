@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
-import { lastRevision, Query, QueryRevision } from "./queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery } from "../api";
-import { Param } from "./parameters";
+import { lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery } from "./api";
+import { Param } from "./QueryExplorer/parameters";
 
 export type MappingsByTenant = {
   [tenant: string]: {
@@ -9,7 +9,7 @@ export type MappingsByTenant = {
   }
 };
 
-export type ExplorerState = {
+export type ManagerState = {
   status: "initial" | "loading" | "completed" | "error",
   mappings: MappingsByTenant,
   queries: Record<string, Query[]>,
@@ -27,7 +27,7 @@ export type ExplorerState = {
   }
 }
 
-const initialState: ExplorerState = {
+const initialState: ManagerState = {
   status: "initial",
   mappings: {},
   queries: {},
@@ -45,7 +45,7 @@ const initialState: ExplorerState = {
   }
 }
 
-type ExplorerAction = 
+type ManagerAction = 
   {type: 'initialization_started'}
   | {type: 'initialization_completed', queries: Record<string, Query[]>, mappingsByTenant: MappingsByTenant}
   | {type: 'refresh_queries', queries: Record<string, Query[]>}
@@ -59,12 +59,12 @@ type ExplorerAction =
   | {type: 'save_query_finished'}
   | {type: 'save_query_failed', error: string}
   
-type Dispatch = React.Dispatch<ExplorerAction>;
+type Dispatch = React.Dispatch<ManagerAction>;
 
-const QueryExplorerStateContext = createContext<ExplorerState | null>(null);
-const QueryExplorerDispatchContext = createContext<Dispatch | null>(null);
+const ManagerStateContext = createContext<ManagerState | null>(null);
+const ManagerDispatchContext = createContext<Dispatch | null>(null);
 
-function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): ExplorerState {
+function managerReducer(state: ManagerState, action: ManagerAction): ManagerState {
   switch (action.type) {
     case 'initialization_started':
       return {...state, status: 'loading'};
@@ -109,28 +109,28 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
 }
 
 
-export function QueryExplorerProvider(props: {children: ReactNode}) {
-  const [state, dispatch] = useReducer(queryExplorerReducer, initialState);
+export function ManagerProvider(props: {children: ReactNode}) {
+  const [state, dispatch] = useReducer(managerReducer, initialState);
 
   return (
-      <QueryExplorerDispatchContext.Provider value={dispatch}>
-        <QueryExplorerStateContext.Provider value={state}>
+      <ManagerDispatchContext.Provider value={dispatch}>
+        <ManagerStateContext.Provider value={state}>
             {props.children}
-        </QueryExplorerStateContext.Provider>
-      </QueryExplorerDispatchContext.Provider>
+        </ManagerStateContext.Provider>
+      </ManagerDispatchContext.Provider>
   )
 }
 
-export function useQueryExplorerState(): ExplorerState {
-  const context = useContext(QueryExplorerStateContext);
+export function useManagerState(): ManagerState {
+  const context = useContext(ManagerStateContext);
   if (context === null) {
     throw new Error('useQueryExploreerState must be used within a QueryExplorerProvider')
   }
   return context;
 }
 
-export function useQueryExplorerDispatch(): Dispatch {
-  const context = useContext(QueryExplorerDispatchContext);
+export function useManagerDispatch(): Dispatch {
+  const context = useContext(ManagerDispatchContext);
   if (context === null) {
     throw new Error('useQueryExploreerDispatch must be used within a QueryExplorerProvider')
   }
@@ -141,7 +141,7 @@ export function getTenants(mappings: MappingsByTenant): string[] {
   return Object.keys(mappings).sort();
 }
 
-export async function initializeExplorer(dispatch: Dispatch) {
+export async function initializeManager(dispatch: Dispatch) {
   dispatch({type: "initialization_started"});
 
   const mappingsByTenant = await fetchMappingsByTenant();
@@ -150,7 +150,7 @@ export async function initializeExplorer(dispatch: Dispatch) {
   dispatch({type: "initialization_completed", mappingsByTenant: mappingsByTenant, queries: queriesByNamespace});
 }
 
-export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState, params: Param[]): Promise<void> {
+export async function runQueryOnRestql(dispatch: Dispatch, state: ManagerState, params: Param[]): Promise<void> {
   dispatch({type:'query_execution_started'});
 
   const inputParams = params
@@ -171,7 +171,7 @@ export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState,
   dispatch({type:'query_execution_finished', result: result});
 }
 
-export async function saveExplorerQuery(dispatch: Dispatch, state: ExplorerState, queryNamespace: string, queryName: string) {
+export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState, queryNamespace: string, queryName: string) {
   dispatch({type:'save_query_started'});
 
   const queryText = state.currentQueryText;

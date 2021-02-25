@@ -11,14 +11,14 @@ import SaveQueryModal from "./save-query";
 import SideMenuModal from './side-menu';
 import { parametersReducer, Param } from "./parameters";
 import { 
-  QueryExplorerProvider, 
-  useQueryExplorerState, 
-  useQueryExplorerDispatch, 
-  initializeExplorer,
-  runExplorerQuery,
-  saveExplorerQuery,
+  ManagerProvider, 
+  useManagerState, 
+  useManagerDispatch, 
+  initializeManager,
+  runQueryOnRestql,
+  saveQueryOnRestql,
   getTenants,
-} from "./explorer.context";
+} from "../manager.context";
 import { QueryRevision, findQueryRevision } from './queries';
 
 
@@ -37,21 +37,21 @@ const useElementDimensions = (defaultHeight: number, defaultWidth: number): [num
 }
 
 function QueryExplorer() {
-  const queryExplorerState = useQueryExplorerState();
-  const queryExplorerDispatch = useQueryExplorerDispatch();
+  const managerState = useManagerState();
+  const managerDispatch = useManagerDispatch();
   useEffect(() => {
-    initializeExplorer(queryExplorerDispatch);
+    initializeManager(managerDispatch);
   }, []);
 
   const routeParams = useParams<{namespace: string, queryName: string, revision: string}>();
   useEffect(() => {
-    const qr = findQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, queryExplorerState.queries);
+    const qr = findQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.queries);
     if (!qr) {
       return
     }
 
-    queryExplorerDispatch({type: "select_query", queryRevision: qr});
-  }, [routeParams, queryExplorerState.status]);
+    managerDispatch({type: "select_query", queryRevision: qr});
+  }, [routeParams, managerState.status]);
 
   const [availableHeight, setAvailableHeight] = useState(0);
   const [availableWidth, setAvailableWidth] = useState(0);
@@ -75,10 +75,10 @@ function QueryExplorer() {
 
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
-    queryExplorerDispatch({type: "select_query", queryRevision: qr});
+    managerDispatch({type: "select_query", queryRevision: qr});
   }
 
-  const queryResult = queryExplorerState.queryResult;
+  const queryResult = managerState.queryResult;
   const jsonViewer = useMemo(() => (
     <JsonViewer 
       name={null} 
@@ -93,7 +93,7 @@ function QueryExplorer() {
   const closeSaveQueryModal = () => setSaveQueryModalOpen(false);
   const openSaveQueryModal = () => setSaveQueryModalOpen(true);
   const onSaveQuery = async (namespace: string, name: string) => { 
-    await saveExplorerQuery(queryExplorerDispatch, queryExplorerState, namespace, name)
+    await saveQueryOnRestql(managerDispatch, managerState, namespace, name)
     setSaveQueryModalOpen(false);
   }
 
@@ -104,7 +104,7 @@ function QueryExplorer() {
   };
   const closeSideMenu = () => setSideMenuOpen(false);
 
-  if (queryExplorerState.status !== 'completed') {
+  if (managerState.status !== 'completed') {
     return <div>Loading...</div>;
   }
 
@@ -112,8 +112,8 @@ function QueryExplorer() {
     "editor": <Editor className="query-explorer__editor" 
                 height={availableHeight} 
                 width={availableWidth}
-                content={queryExplorerState.currentQueryText}
-                onChange={(content: string) => queryExplorerDispatch({type: 'updated_query_text', text: content})} />,
+                content={managerState.currentQueryText}
+                onChange={(content: string) => managerDispatch({type: 'updated_query_text', text: content})} />,
     "params": <ParametersEditor
                 height={availableHeight}
                 width={availableWidth}
@@ -127,12 +127,12 @@ function QueryExplorer() {
           <QueryControls 
             params={params} 
             disableActions={{
-              run: queryExplorerState.queryResult.status === 'running',
-              save: !queryExplorerState.currentQueryText || queryExplorerState.queryResult.status === 'running',
+              run: managerState.queryResult.status === 'running',
+              save: !managerState.currentQueryText || managerState.queryResult.status === 'running',
             }}
             onMenuOpen={openSideMenu}
             onChange={queryControlChangeHandler} 
-            onRun={() => runExplorerQuery(queryExplorerDispatch, queryExplorerState, params)}
+            onRun={() => runQueryOnRestql(managerDispatch, managerState, params)}
             onSave={openSaveQueryModal}
           />
         </div>
@@ -140,10 +140,10 @@ function QueryExplorer() {
           <div className="query-inputs">
             <div ref={selectorsRef} className="query-inputs__selectors">
               <QuerySelectors 
-                tenants={getTenants(queryExplorerState.mappings)} 
+                tenants={getTenants(managerState.mappings)} 
                 onModeChange={setMode} 
-                onTenantChange={(tenant) => queryExplorerDispatch({type: 'select_tenant', tenant: tenant})}
-                onDebugChange={(debug) => queryExplorerDispatch({type: 'set_debug', debug: debug})}
+                onTenantChange={(tenant) => managerDispatch({type: 'select_tenant', tenant: tenant})}
+                onDebugChange={(debug) => managerDispatch({type: 'set_debug', debug: debug})}
               />
             </div>
 
@@ -161,29 +161,21 @@ function QueryExplorer() {
         </div>
         <SaveQueryModal 
           isOpen={saveQueryModalOpen} 
-          status={queryExplorerState.saveQueryModal.status}
-          selectedQuery={queryExplorerState.selectedQuery}
-          errorMessage={queryExplorerState.saveQueryModal.error}
+          status={managerState.saveQueryModal.status}
+          selectedQuery={managerState.selectedQuery}
+          errorMessage={managerState.saveQueryModal.error}
           onSave={onSaveQuery}
           onClose={closeSaveQueryModal} 
         />
         <SideMenuModal 
           isOpen={sideMenuOpen}
-          queriesByNamespace={queryExplorerState.queries}
-          selectedQuery={queryExplorerState.selectedQuery}
-          mappings={queryExplorerState.mappings}
+          queriesByNamespace={managerState.queries}
+          selectedQuery={managerState.selectedQuery}
+          mappings={managerState.mappings}
           onClose={closeSideMenu}
         />
     </>
   )
 }
 
-function QueryExplorerContainer() {
-  return (
-    <QueryExplorerProvider>
-      <QueryExplorer />
-    </QueryExplorerProvider>
-  )
-}
-
-export default QueryExplorerContainer
+export default QueryExplorer

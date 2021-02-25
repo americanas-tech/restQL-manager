@@ -1,6 +1,6 @@
 
 import { useState, useEffect, FormEvent } from "react";
-import { getTenants, MappingsByTenant } from "../explorer.context";
+import { getTenants, MappingsByTenant } from "../../manager.context";
 import './resource-list.scss';
 
 type ResourceListProps = {
