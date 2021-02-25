@@ -16,6 +16,7 @@ import {
   initializeExplorer,
   runExplorerQuery,
   saveExplorerQuery,
+  getTenants,
 } from "./explorer.context";
 import { QueryRevision } from './queries';
 
@@ -129,7 +130,7 @@ function QueryExplorer() {
           <div className="query-inputs">
             <div ref={selectorsRef} className="query-inputs__selectors">
               <QuerySelectors 
-                tenants={queryExplorerState.tenants} 
+                tenants={getTenants(queryExplorerState.mappings)} 
                 onModeChange={setMode} 
                 onTenantChange={(tenant) => queryExplorerDispatch({type: 'select_tenant', tenant: tenant})}
                 onDebugChange={(debug) => queryExplorerDispatch({type: 'set_debug', debug: debug})}
@@ -160,6 +161,7 @@ function QueryExplorer() {
           isOpen={sideMenuOpen}
           queriesByNamespace={queryExplorerState.queries}
           selectedQuery={queryExplorerState.selectedQuery}
+          mappings={queryExplorerState.mappings}
           onClose={closeSideMenu}
         />
     </>

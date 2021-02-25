@@ -1,6 +1,6 @@
 import {  useState, useEffect } from "react";
 import { Query } from "../queries";
-import './index.scss';
+import './query-list.scss';
 
 type QueryListProps = {
   queriesByNamespace: Record<string, Query[]>,
@@ -8,7 +8,7 @@ type QueryListProps = {
 
 function QueryList(props: QueryListProps) {
   const {queriesByNamespace} = props;
-  const allNamespaces = Object.keys(queriesByNamespace);
+  const allNamespaces = Object.keys(queriesByNamespace).sort();
   const [namespaces, setNamespaces] = useState(allNamespaces);
   
   const [selectedNamespace, setSelectedNamespace] = useState("");

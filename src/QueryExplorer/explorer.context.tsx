@@ -1,12 +1,17 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { Query, QueryRevision } from "./queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, runQuery, saveQuery } from "../api";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery } from "../api";
 import { Param } from "./parameters";
+
+export type MappingsByTenant = {
+  [tenant: string]: {
+    [resource: string]: {url: string, source: string}
+  }
+};
 
 export type ExplorerState = {
   status: "initial" | "loading" | "completed" | "error",
-  tenants: string[],
-  namespaces: string[],
+  mappings: MappingsByTenant,
   queries: Record<string, Query[]>,
   selectedQuery: QueryRevision | null,
   selectedTenant: string,
@@ -24,8 +29,7 @@ export type ExplorerState = {
 
 const initialState: ExplorerState = {
   status: "initial",
-  tenants: [],
-  namespaces: [],
+  mappings: {},
   queries: {},
   selectedQuery: null,
   selectedTenant: "",
@@ -43,7 +47,7 @@ const initialState: ExplorerState = {
 
 type ExplorerAction = 
   {type: 'initialization_started'}
-  | {type: 'initialization_completed', queries: Record<string, Query[]>, tenants: string[]}
+  | {type: 'initialization_completed', queries: Record<string, Query[]>, mappingsByTenant: MappingsByTenant}
   | {type: 'refresh_queries', queries: Record<string, Query[]>}
   | {type: 'select_query', queryRevision: QueryRevision}
   | {type: 'set_debug', debug: boolean}
@@ -65,19 +69,18 @@ function queryExplorerReducer(state: ExplorerState, action: ExplorerAction): Exp
     case 'initialization_started':
       return {...state, status: 'loading'};
     case 'initialization_completed':
+      const tenants = getTenants(action.mappingsByTenant);
       return {
         ...state, 
         status: 'completed', 
-        tenants: action.tenants.sort(), 
+        mappings: action.mappingsByTenant,
         queries: action.queries,
-        namespaces: Object.keys(action.queries).sort(),
-        selectedTenant: action.tenants[0],
+        selectedTenant: tenants[0],
       };
     case 'refresh_queries':
       return {
         ...state, 
         queries: action.queries,
-        namespaces: Object.keys(action.queries).sort(),
       };
     case 'select_query':
       return {...state, selectedQuery: action.queryRevision, currentQueryText: action.queryRevision.text};
@@ -134,13 +137,17 @@ export function useQueryExplorerDispatch(): Dispatch {
   return context
 }
 
+export function getTenants(mappings: MappingsByTenant): string[] {
+  return Object.keys(mappings).sort();
+}
+
 export async function initializeExplorer(dispatch: Dispatch) {
   dispatch({type: "initialization_started"});
 
-  const tenants = await fetchTenants();
+  const mappingsByTenant = await fetchMappingsByTenant();
   const queriesByNamespace = await fetchNamespacesAndQueries();
 
-  dispatch({type: "initialization_completed", tenants: tenants, queries: queriesByNamespace});
+  dispatch({type: "initialization_completed", mappingsByTenant: mappingsByTenant, queries: queriesByNamespace});
 }
 
 export async function runExplorerQuery(dispatch: Dispatch, state: ExplorerState, params: Param[]): Promise<void> {
@@ -208,4 +215,16 @@ async function fetchNamespacesAndQueries() {
   }
 
   return queriesByNamespace
+}
+
+async function fetchMappingsByTenant() {
+  const tenants = await fetchTenants();
+  const mappings = await Promise.all(tenants.map(t => fetchMappingsFromTenant(t)));
+  
+  const mappinsByTenant: {[k: string]: any} = {};
+  for (const tenantMappings of mappings) {
+    mappinsByTenant[tenantMappings.tenant] = tenantMappings.mappings;
+  }
+
+  return mappinsByTenant;
 }

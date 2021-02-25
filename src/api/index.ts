@@ -19,6 +19,23 @@ export async function fetchTenants(): Promise<string[]> {
   return data.tenants;
 }
 
+type TenantMappings = {
+  mappings: Record<string, {url: string, source: string}>,
+  tenant: string
+}
+
+export async function fetchMappingsFromTenant(tenant: string): Promise<TenantMappings> {
+  const response = await axios({
+    method: 'GET',
+    baseURL: adminUrl,
+    url: `/tenant/${tenant}/mapping`,
+  });
+
+  const data = response.data as TenantMappings;
+
+  return data;
+}
+
 type FetchNamespacesResponse = {
   namespaces: string[]
 }
