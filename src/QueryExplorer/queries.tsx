@@ -19,6 +19,10 @@ export function stringifyQueryRevision(queryRevision: QueryRevision): string {
   return `/${queryRevision.namespace}/${queryRevision.name}/${queryRevision.revision}`;
 }
 
+export function lastRevision(revisions: {text: string, revision: number}[]): number {
+  return Math.max(...revisions.map(r => r.revision));
+}
+
 export function findQueryRevision(namespace: string, queryName: string, revision: string | null, queries: Record<string, Query[]>): QueryRevision | null {
   const namespacedQueries  = queries[namespace];
   if (!namespacedQueries) {
@@ -32,8 +36,8 @@ export function findQueryRevision(namespace: string, queryName: string, revision
 
   const revisionNumber = parseInt(revision || "");
   if (!revisionNumber) {
-    const lastRev = query.revisions.length-1;
-    const rev = query.revisions[lastRev];
+    const lastRev = lastRevision(query.revisions);
+    const rev = query.revisions[lastRev-1];
 
     return {
       namespace: namespace,
@@ -45,8 +49,8 @@ export function findQueryRevision(namespace: string, queryName: string, revision
 
   const chosenRevision = query.revisions.find(r => r.revision === revisionNumber);
   if (!chosenRevision) {
-    const lastRev = query.revisions.length-1;
-    const rev = query.revisions[lastRev];
+    const lastRev = lastRevision(query.revisions);
+    const rev = query.revisions[lastRev-1];
 
     return {
       namespace: namespace,

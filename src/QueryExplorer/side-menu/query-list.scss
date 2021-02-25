@@ -107,6 +107,11 @@
   font-size: 1.2rem;
   margin-bottom: 1rem;
 
+  > a {
+    text-decoration: none;
+    color: $white;
+  }
+
   &:last-child {
     margin-bottom: 0;
   }

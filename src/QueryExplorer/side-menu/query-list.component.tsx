@@ -1,5 +1,6 @@
 import {  useState, useEffect } from "react";
-import { Query } from "../queries";
+import { Link } from "react-router-dom";
+import { lastRevision, Query } from "../queries";
 import './query-list.scss';
 
 type QueryListProps = {
@@ -68,12 +69,12 @@ function NamespacedQueries(props: NamespacedQueriesProps) {
   const filteredQueries = queries.filter(q => q.name.includes(queryFilter));
 
   return (
-    <li key={namespace} className="side-menu__query-list__namespace" onClick={() => setOpen(!open)}>
-      <span>{namespace}</span>
+    <li key={namespace} className="side-menu__query-list__namespace">
+      <span onClick={() => setOpen(!open)}>{namespace}</span>
       <ul className={"side-menu__query-list__namespaced-queries" + (open ? " side-menu__query-list__namespaced-queries--open" : "")}>
         {filteredQueries.map(q => (
           <li key={q.name} className="side-menu__query-list__query">
-            <span>{q.name}</span>
+            <Link to={`/query/${namespace}/${q.name}/${lastRevision(q.revisions)}`}>{q.name}</Link>
           </li>
         ))}
       </ul>

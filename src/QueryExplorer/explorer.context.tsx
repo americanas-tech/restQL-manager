@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
-import { Query, QueryRevision } from "./queries";
+import { lastRevision, Query, QueryRevision } from "./queries";
 import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery } from "../api";
 import { Param } from "./parameters";
 
@@ -195,13 +195,14 @@ function getNewRevision(queriesByNamespace: Record<string, Query[]>, namespace: 
 
   const query = namespacedQueries.find(q => q.name === name) as Query;
 
-  const lastRevision = query.revisions[query.revisions.length-1];
+  const lastRevisionNumber = lastRevision(query.revisions);
+  const rev = query.revisions[lastRevisionNumber-1];
 
   return {
     namespace: namespace,
     name: name,
-    revision: lastRevision.revision,
-    text: lastRevision.text,
+    revision: rev.revision,
+    text: rev.text,
   }
 }
 
