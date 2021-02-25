@@ -1,4 +1,5 @@
 import { useState, useEffect, useReducer, useMemo, useCallback } from 'react';
+import { useParams } from "react-router-dom";
 import './index.scss';
 
 import QueryControls from './query-controls';
@@ -18,7 +19,7 @@ import {
   saveExplorerQuery,
   getTenants,
 } from "./explorer.context";
-import { QueryRevision } from './queries';
+import { QueryRevision, findQueryRevision } from './queries';
 
 
 const useElementDimensions = (defaultHeight: number, defaultWidth: number): [number, number, any] => {
@@ -41,6 +42,16 @@ function QueryExplorer() {
   useEffect(() => {
     initializeExplorer(queryExplorerDispatch);
   }, []);
+
+  const routeParams = useParams<{namespace: string, queryName: string, revision: string}>();
+  useEffect(() => {
+    const qr = findQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, queryExplorerState.queries);
+    if (!qr) {
+      return
+    }
+
+    queryExplorerDispatch({type: "select_query", queryRevision: qr});
+  }, [routeParams, queryExplorerState.status]);
 
   const [availableHeight, setAvailableHeight] = useState(0);
   const [availableWidth, setAvailableWidth] = useState(0);
@@ -89,7 +100,6 @@ function QueryExplorer() {
 
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const openSideMenu = () => {
-    console.log('open side menu')
     setSideMenuOpen(true)
   };
   const closeSideMenu = () => setSideMenuOpen(false);
