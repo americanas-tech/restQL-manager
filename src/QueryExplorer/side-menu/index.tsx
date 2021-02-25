@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { ReactComponent as LogoIcon } from './logo.svg';
 import ReactModal from 'react-modal';
 import { Query, QueryRevision } from "../queries";
-import QueryList from './query-list.coponent';
+import QueryList from './query-list.component';
 import './index.scss';
 
 export type SideMenuModal = {
