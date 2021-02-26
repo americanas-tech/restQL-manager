@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery } from "./api";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery, setResource } from "./api";
 import { Param } from "./QueryExplorer/parameters";
 
 export type MappingsByTenant = {
@@ -24,6 +24,10 @@ export type ManagerState = {
   saveQueryModal: {
     status: 'stale' | 'saving',
     error: string
+  },
+  manageResourceModal: {
+    status: 'stale' | 'saving',
+    error: string
   }
 }
 
@@ -42,6 +46,10 @@ const initialState: ManagerState = {
   saveQueryModal: {
     status: 'stale',
     error: ''
+  },
+  manageResourceModal: {
+    status: 'stale',
+    error: ''
   }
 }
 
@@ -58,6 +66,10 @@ type ManagerAction =
   | {type: 'save_query_started'}
   | {type: 'save_query_finished'}
   | {type: 'save_query_failed', error: string}
+  | {type: 'set_resource_started'}
+  | {type: 'set_resource_finished'}
+  | {type: 'set_resource_failed', error: string}
+  | {type: 'refresh_mappings', mappings: MappingsByTenant}
   
 type Dispatch = React.Dispatch<ManagerAction>;
 
@@ -103,6 +115,14 @@ function managerReducer(state: ManagerState, action: ManagerAction): ManagerStat
       return {...state, saveQueryModal: {status: 'stale', error: ""}}
     case 'save_query_failed':
       return {...state, saveQueryModal: {status: 'stale', error: action.error}}
+    case 'set_resource_started':
+      return {...state, manageResourceModal: {status: 'saving', error: ""}}
+    case 'set_resource_finished':
+      return {...state, manageResourceModal: {status: 'stale', error: ""}}
+    case 'set_resource_failed':
+      return {...state, manageResourceModal: {status: 'stale', error: action.error}}
+    case 'refresh_mappings':
+      return {...state, mappings: action.mappings}
     default:
       return state;
   }
@@ -187,6 +207,22 @@ export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState,
     dispatch({type:'save_query_finished'});
   } catch (error) {
     dispatch({type:'save_query_failed', error: error});
+  }
+}
+
+export async function setResourceOnRestql(dispatch: Dispatch, tenant: string, resourceName: string, resourceUrl: string, authorizationCode: string) {
+  dispatch({type:'set_resource_started'});
+
+  try {
+    await setResource(tenant, resourceName, resourceUrl, authorizationCode);
+    
+    const mappingsByTenant = await fetchMappingsByTenant();
+
+    dispatch({type:'refresh_mappings', mappings: mappingsByTenant});
+    
+    dispatch({type:'set_resource_finished'});
+  } catch (error) {
+    dispatch({type:'set_resource_failed', error: error});
   }
 }
 

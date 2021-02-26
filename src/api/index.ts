@@ -110,3 +110,21 @@ export async function runQuery(text: string, params: Record<string, any>) {
     return error.response.data;
   }
 }
+
+export async function setResource(tenant: string, name: string, url: string, authorizationCode: string) {
+  try {
+    await axios({
+      method: 'POST',
+      baseURL: adminUrl,
+      url: `/tenant/${tenant}/mapping/${name}`,
+      headers: {
+        "Authorization": `Bearer ${authorizationCode}`
+      },
+      data: {
+        url: url
+      }
+    });
+  } catch (error) {
+    return error.response.data;
+  }
+}

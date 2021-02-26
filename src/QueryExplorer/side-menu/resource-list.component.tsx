@@ -1,5 +1,6 @@
 
 import { useState, useEffect, FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { getTenants, MappingsByTenant } from "../../manager.context";
 import './resource-list.scss';
 
@@ -30,13 +31,17 @@ function ResourceList(props: ResourceListProps) {
   return (
     <section className="side-menu__resources">
       <div className="side-menu__resources__inputs">
-      <button className="side-menu__resources__edit">Edit resources</button>
+        <Link to="/resources">
+          <button className="side-menu__resources__edit">Edit resources</button>
+        </Link>
+        
         <select onChange={updateSelectedTenant} name="tenants" id="tenants" className="side-menu__resources__select-tenant">
           <option value={ALL_TENANTS}>ALL</option>
           {allTenants.map(t => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>
+        
         <input 
           type="text" 
           name="resource-search" 

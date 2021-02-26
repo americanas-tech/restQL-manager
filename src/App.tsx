@@ -1,27 +1,46 @@
-import React from "react";
+import {useEffect} from "react";
 import {
   BrowserRouter as Router,
   Switch,
   Route
 } from "react-router-dom";
-import { ManagerProvider } from "./manager.context";
+import { ManagerProvider, initializeManager, useManagerDispatch, useManagerState } from "./manager.context";
 import QueryExplorer from './QueryExplorer';
+import ResourceEditor from "./ResourceEditor";
 
-type AppProps = {}
+function Scaffold() {
+  const managerState = useManagerState();
+  const managerDispatch = useManagerDispatch();
+  useEffect(() => {
+    initializeManager(managerDispatch);
+  }, []);
 
-function App(props: AppProps) {
+    
+  if (managerState.status !== 'completed') {
+    return <p>Loading...</p>
+  }
+
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/">
+          <QueryExplorer />
+        </Route>
+        <Route path="/query/:namespace/:queryName/:revision?">
+          <QueryExplorer />
+        </Route>
+        <Route patch="/resources">
+          <ResourceEditor />
+        </Route>
+      </Switch>
+    </Router>
+  )
+}
+
+function App() {
   return (
     <ManagerProvider>
-      <Router>
-        <Switch>
-          <Route exact path="/">
-            <QueryExplorer />
-          </Route>
-          <Route exact path="/query/:namespace/:queryName/:revision?">
-            <QueryExplorer />
-          </Route>
-        </Switch>
-      </Router>
+      <Scaffold />
     </ManagerProvider>
   );
 }

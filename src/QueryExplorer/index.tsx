@@ -39,9 +39,6 @@ const useElementDimensions = (defaultHeight: number, defaultWidth: number): [num
 function QueryExplorer() {
   const managerState = useManagerState();
   const managerDispatch = useManagerDispatch();
-  useEffect(() => {
-    initializeManager(managerDispatch);
-  }, []);
 
   const routeParams = useParams<{namespace: string, queryName: string, revision: string}>();
   useEffect(() => {
