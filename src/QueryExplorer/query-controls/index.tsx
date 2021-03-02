@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { FixedSizeList as List } from "react-window";
 
 import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
@@ -14,6 +15,26 @@ type option = {
 }
 
 const Input = (props: InputProps) => <components.Input {...props} isHidden={false} />;
+
+const height = 43;
+
+const MenuList = (props: any) => {
+  const { options, children, maxHeight, getValue } = props;
+  const [value] = getValue();
+  const initialOffset = options.indexOf(value) * height;
+
+  return (
+    <List
+      width={"100%"}
+      height={maxHeight}
+      itemCount={children.length}
+      itemSize={height}
+      initialScrollOffset={initialOffset}
+    >
+      {({ index, style }) => <div style={style}>{children[index]}</div>}
+    </List>
+  )
+}
 
 type EditableSelect = {
   selectedQuery: QueryRevision | null,
@@ -97,7 +118,7 @@ function EditableSelect(props: EditableSelect) {
       onInputChange={onInputChange}
       onChange={onChange}
       controlShouldRenderValue={false}
-      components={{Input}}
+      components={{Input, MenuList}}
       noOptionsMessage={disableNoOptionsMessage}
       filterOption={filterOption(selectedNamespace, selectedQueryName)}
       escapeClearsValue={true}
