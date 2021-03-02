@@ -38,7 +38,7 @@ function QuerySelector(props: QuerySelectorsProps) {
       <div className="query-inputs__tenant-selector">
         <label>Tenant:</label>
         <select onChange={tenantSelectorHandler} name="editor-params-selector">
-          {props.tenants.map(t => (<option value={t}>{t}</option>))}
+          {props.tenants.map(t => (<option key={t} value={t}>{t}</option>))}
         </select>
       </div>
 

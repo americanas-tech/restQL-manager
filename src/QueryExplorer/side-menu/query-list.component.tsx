@@ -41,7 +41,7 @@ function QueryList(props: QueryListProps) {
         onChange={(e) => updateSearch(e.currentTarget.value)}
       />
       <ul className="side-menu__query-list">
-        {namespaces.map(n => <NamespacedQueries namespace={n} selectedNamespace={selectedNamespace} queryFilter={queryFilter}  queries={queriesByNamespace[n]} />)}
+        {namespaces.map(n => <NamespacedQueries key={n} namespace={n} selectedNamespace={selectedNamespace} queryFilter={queryFilter}  queries={queriesByNamespace[n]} />)}
       </ul>
     </section>
   );

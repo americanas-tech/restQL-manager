@@ -46,7 +46,7 @@ function QueryExplorer() {
     }
 
     managerDispatch({type: "select_query", queryRevision: qr});
-  }, [routeParams, managerState.status]);
+  }, [routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.status]);
 
   const [availableHeight, setAvailableHeight] = useState(0);
   const [availableWidth, setAvailableWidth] = useState(0);

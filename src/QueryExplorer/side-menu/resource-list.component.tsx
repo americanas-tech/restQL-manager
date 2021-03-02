@@ -52,7 +52,7 @@ function ResourceList(props: ResourceListProps) {
         />
       </div>
       <ul className="side-menu__resource-list">
-        {tenants.map(t => <TenantMappings tenant={t} mappings={props.mappings[t]} selectedTenant={selectedTenant} resourceFilter={search} />)}
+        {tenants.map(t => <TenantMappings key={t} tenant={t} mappings={props.mappings[t]} selectedTenant={selectedTenant} resourceFilter={search} />)}
       </ul>
     </section>
   )
@@ -70,8 +70,6 @@ function TenantMappings(props: TenantMappingsProps) {
 
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    
-
     if (selectedTenant === tenant) {
       setOpen(true);
     } else {
@@ -102,10 +100,13 @@ function TenantMappings(props: TenantMappingsProps) {
       <ul className={"side-menu__resource-list__tenant-resources" + (open ? " side-menu__resource-list__tenant-resources--open" : "")}>
         {filteredMappings.map(resourceName => {
           if (!resourceName) {
-            return null
+            return
           }
 
           const resource = mappings[resourceName];
+          if (!resource) {
+            console.log("not resource", resource, resourceName, mappings)
+          }
 
           return (
             <li key={resourceName} className="side-menu__query-list__resource">
