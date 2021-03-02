@@ -7,6 +7,7 @@ import {
 import { ManagerProvider, initializeManager, useManagerDispatch, useManagerState } from "./manager.context";
 import QueryExplorer from './QueryExplorer';
 import ResourceEditor from "./ResourceEditor";
+import Loading from './Loading';
 
 function Scaffold() {
   const managerState = useManagerState();
@@ -17,7 +18,7 @@ function Scaffold() {
 
     
   if (managerState.status !== 'completed') {
-    return <p>Loading...</p>
+    return <Loading />
   }
 
   return (
