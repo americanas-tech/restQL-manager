@@ -30,7 +30,7 @@ function ManageResourceModal(props: ManageResourceModalProps) {
 
   const closeHandler = () => {
     setCode("");
-    props.onClose();
+    onClose();
   }
 
   const isSaving = status === 'saving';

@@ -11,10 +11,8 @@ import SaveQueryModal from "./save-query";
 import SideMenuModal from './side-menu';
 import { parametersReducer, Param } from "./parameters";
 import { 
-  ManagerProvider, 
   useManagerState, 
   useManagerDispatch, 
-  initializeManager,
   runQueryOnRestql,
   saveQueryOnRestql,
   getTenants,
@@ -167,7 +165,6 @@ function QueryExplorer() {
         <SideMenuModal 
           isOpen={sideMenuOpen}
           queriesByNamespace={managerState.queries}
-          selectedQuery={managerState.selectedQuery}
           mappings={managerState.mappings}
           onClose={closeSideMenu}
         />

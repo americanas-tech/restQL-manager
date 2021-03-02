@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { ReactComponent as LogoIcon } from './logo.svg';
 import ReactModal from 'react-modal';
-import { Query, QueryRevision } from "../queries";
+import { Query } from "../queries";
 import QueryList from './query-list.component';
 import './index.scss';
 import ResourceList from "./resource-list.component";
 import { MappingsByTenant } from "../../manager.context";
 
-export type SideMenuModal = {
+export type SideMenuModalProps = {
   isOpen: boolean,
-  selectedQuery: QueryRevision | null,
   queriesByNamespace: Record<string, Query[]>,
   mappings: MappingsByTenant,
   onClose: () => void,
@@ -17,8 +16,8 @@ export type SideMenuModal = {
 
 type menuMode = 'queries' | 'resources';
 
-function SideMenuModal(props: SideMenuModal) {
-  const {isOpen, selectedQuery, onClose} = props;
+function SideMenuModal(props: SideMenuModalProps) {
+  const {isOpen, onClose} = props;
 
   const [mode, setMode] = useState<menuMode>('queries');
 

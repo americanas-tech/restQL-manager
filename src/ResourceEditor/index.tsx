@@ -28,6 +28,7 @@ function ResourceEditor() {
     if (initialTenant) {
       selectTenant(initialTenant);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managerState.mappings]);
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -52,7 +53,7 @@ function ResourceEditor() {
         <ul className="resource-editor__mapping-list">
           {Object.keys(mappings).map(resourceName => {
             if (!resourceName) {
-              return
+              return null
             }
 
             return (

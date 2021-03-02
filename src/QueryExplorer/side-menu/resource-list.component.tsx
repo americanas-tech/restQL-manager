@@ -77,6 +77,7 @@ function TenantMappings(props: TenantMappingsProps) {
     } else {
       setOpen(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTenant]);
 
   const resourceNames = Object.keys(mappings).sort();
@@ -92,7 +93,7 @@ function TenantMappings(props: TenantMappingsProps) {
       setFilteredMappings(newFilteredMappings);
       setOpen(true);
     }
-
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resourceFilter])
   
   return (
@@ -101,7 +102,7 @@ function TenantMappings(props: TenantMappingsProps) {
       <ul className={"side-menu__resource-list__tenant-resources" + (open ? " side-menu__resource-list__tenant-resources--open" : "")}>
         {filteredMappings.map(resourceName => {
           if (!resourceName) {
-            return
+            return null
           }
 
           const resource = mappings[resourceName];

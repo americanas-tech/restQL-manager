@@ -64,6 +64,7 @@ function NamespacedQueries(props: NamespacedQueriesProps) {
     } else {
       setOpen(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedNamespace]);
 
   const filteredQueries = queries.filter(q => q.name.includes(queryFilter));

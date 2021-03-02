@@ -36,7 +36,7 @@ const MenuList = (props: any) => {
   )
 }
 
-type EditableSelect = {
+type EditableSelectProps = {
   selectedQuery: QueryRevision | null,
   options: option[],
   params: Param[],
@@ -44,7 +44,7 @@ type EditableSelect = {
 }
 
 // Source: https://github.com/JedWatson/react-select/issues/1558#issuecomment-738880505
-function EditableSelect(props: EditableSelect) {
+function EditableSelect(props: EditableSelectProps) {
   const defaultOption = props.selectedQuery ? { label: stringifyQueryRevision(props.selectedQuery), value: props.selectedQuery} : null;
   const [option, setOption] = useState<option | null>(defaultOption);
   

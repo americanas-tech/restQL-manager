@@ -3,7 +3,7 @@ import ReactModal from 'react-modal';
 import { QueryRevision } from "../queries";
 import './index.scss';
 
-export type SaveQueryModal = {
+export type SaveQueryModalProps = {
   status: 'stale' | 'saving',
   isOpen: boolean,
   selectedQuery: QueryRevision | null,
@@ -16,7 +16,7 @@ const inputChangeHandler = (setter: (value: any) => void) => (e: FormEvent<HTMLI
   setter(e.currentTarget.value);
 }
 
-function SaveQueryModal(props: SaveQueryModal) {
+function SaveQueryModal(props: SaveQueryModalProps) {
   const {status, isOpen, selectedQuery, errorMessage, onSave, onClose} = props;
 
   const [namespace, setNamespace] = useState("");
