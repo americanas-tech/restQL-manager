@@ -15,10 +15,6 @@ export type QueryRevision = {
   revision: number
 }
 
-export function stringifyQueryRevision(queryRevision: QueryRevision): string {
-  return `/${queryRevision.namespace}/${queryRevision.name}/${queryRevision.revision}`;
-}
-
 export function lastRevision(revisions: {text: string, revision: number}[]): number {
   return Math.max(...revisions.map(r => r.revision));
 }

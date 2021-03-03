@@ -92,7 +92,9 @@ function QueryExplorer() {
 
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
-    managerDispatch({type: "select_query", queryRevision: qr});
+    if (qr) {
+      managerDispatch({type: "select_query", queryRevision: qr});
+    }
   }
 
   const queryResult = managerState.queryResult;

@@ -6,7 +6,7 @@ import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
 import Select, {components, InputActionMeta, InputProps} from 'react-select';
 import { useManagerState } from "../../manager.context";
-import { Query, QueryRevision, stringifyQueryRevision } from "../queries";
+import { Query, QueryRevision } from "../queries";
 import { Param, parseParams, stringifyParams } from "../parameters";
 
 type option = {
@@ -56,12 +56,16 @@ function EditableSelect(props: EditableSelectProps) {
   const [inputValue, setInputValue] = useState(defaultInputValue);
 
   useEffect(() => {
-    if (!option) {
+    if (!queryParams) {
       return
     }
 
-    const newInputValue = Boolean(queryParams) ? `${option.label}?${queryParams}` : option.label;
-    setInputValue(newInputValue);
+    if (option) {
+      const newInputValue = Boolean(queryParams) ? `${option.label}?${queryParams}` : option.label;
+      setInputValue(newInputValue);
+    } else {
+      setInputValue(`?${queryParams}`);
+    }
   }, [queryParams]);
 
   useEffect(() => {
@@ -80,8 +84,14 @@ function EditableSelect(props: EditableSelectProps) {
     }
     setInputValue(inputValue);
 
-    if (!option) {
-      return
+    let choosenOption;
+
+    const [namespace, queryName, revision] = parseQueryRevision(inputValue);
+    if (namespace && queryName && revision) {
+       const newOption = props.options.find(o => o.value.namespace === namespace && o.value.name === queryName && o.value.revision === revision)
+       if (newOption) {
+         choosenOption = newOption;
+       }
     }
 
     const originalParams = props.params;
@@ -89,7 +99,8 @@ function EditableSelect(props: EditableSelectProps) {
     
     const updatedParams = mergeParams(originalParams, inputParams);
 
-    props.onChange(option.value, updatedParams);
+    const qr = choosenOption?.value || option?.value as QueryRevision;
+    props.onChange(qr, updatedParams);
   };
 
   const onChange = (option: option | null) => {
@@ -155,7 +166,7 @@ function mergeParams(original: Param[], input: Param[]): Param[] {
   return updatedParams;
 }
 
-const queryTargetRegex = /\/([^?/]*)/gm; 
+
 
 const filterOption = (selectedNamespace: string, selectedQuery: string) => (candidate: {label: string, value: string, data: any}, input: string): boolean => {
   if (!Boolean(input) && !Boolean(selectedNamespace) && !Boolean(selectedQuery)) {
@@ -166,15 +177,27 @@ const filterOption = (selectedNamespace: string, selectedQuery: string) => (cand
     const namespacedQuery = `${selectedNamespace}/${selectedQuery}`
     return candidate.label.includes(namespacedQuery);
   }
-  
-  const matches = input.match(queryTargetRegex) || [];
-  if (matches.length >= 2) {
-    const namespacedQuery = `${matches[0]}${matches[1]}`
+
+  const [namespace, queryName] = parseQueryRevision(input);
+  if (namespace && queryName) {
+    const namespacedQuery = `/${namespace}/${queryName}`
     return candidate.label.includes(namespacedQuery);
   }
 
   return candidate.label.includes(input);
 };
+
+function stringifyQueryRevision(queryRevision: QueryRevision): string {
+  return `/${queryRevision.namespace}/${queryRevision.name}/${queryRevision.revision}`;
+}
+
+const queryTargetRegex = /\/([^?/]*)/gm; 
+
+function parseQueryRevision(input: string): [string, string, number] {
+  let matches = input.match(queryTargetRegex) || [];
+  matches = matches.map(s => s.replace('/', ''));
+  return [matches[0] || "", matches[1] || "", parseInt(matches[2] || "") || 0];
+}
 
 const disableNoOptionsMessage = () => null;
 
