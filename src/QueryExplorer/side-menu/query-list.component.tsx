@@ -5,6 +5,7 @@ import './query-list.scss';
 
 type QueryListProps = {
   queriesByNamespace: Record<string, Query[]>,
+  onQuerySelection: () => void,
 }
 
 function QueryList(props: QueryListProps) {
@@ -41,7 +42,7 @@ function QueryList(props: QueryListProps) {
         onChange={(e) => updateSearch(e.currentTarget.value)}
       />
       <ul className="side-menu__query-list">
-        {namespaces.map(n => <NamespacedQueries key={n} namespace={n} selectedNamespace={selectedNamespace} queryFilter={queryFilter}  queries={queriesByNamespace[n]} />)}
+        {namespaces.map(n => <NamespacedQueries onQuerySelection={props.onQuerySelection} key={n} namespace={n} selectedNamespace={selectedNamespace} queryFilter={queryFilter}  queries={queriesByNamespace[n]} />)}
       </ul>
     </section>
   );
@@ -51,7 +52,8 @@ type NamespacedQueriesProps = {
   selectedNamespace: string,
   queryFilter: string,
   namespace: string, 
-  queries: Query[]
+  queries: Query[],
+  onQuerySelection: () => void,
 }
 
 function NamespacedQueries(props: NamespacedQueriesProps) {
@@ -75,7 +77,7 @@ function NamespacedQueries(props: NamespacedQueriesProps) {
       <ul className={"side-menu__query-list__namespaced-queries" + (open ? " side-menu__query-list__namespaced-queries--open" : "")}>
         {filteredQueries.map(q => (
           <li key={q.name} className="side-menu__query-list__query">
-            <Link to={`/query/${namespace}/${q.name}/${lastRevision(q.revisions)}`}>{q.name}</Link>
+            <Link onClick={props.onQuerySelection} to={`/query/${namespace}/${q.name}/${lastRevision(q.revisions)}`}>{q.name}</Link>
           </li>
         ))}
       </ul>

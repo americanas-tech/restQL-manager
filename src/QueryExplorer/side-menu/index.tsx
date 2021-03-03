@@ -22,7 +22,7 @@ function SideMenuModal(props: SideMenuModalProps) {
   const [mode, setMode] = useState<menuMode>('queries');
 
   const modeToComponent: Record<menuMode, JSX.Element> = {
-    'queries': <QueryList queriesByNamespace={props.queriesByNamespace} />,
+    'queries': <QueryList onQuerySelection={onClose} queriesByNamespace={props.queriesByNamespace} />,
     'resources': <ResourceList mappings={props.mappings} />,
   }
 
