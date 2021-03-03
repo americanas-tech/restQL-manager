@@ -9,7 +9,7 @@ import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
 import SaveQueryModal from "./save-query";
 import SideMenuModal from './side-menu';
-import { parametersReducer, Param } from "./parameters";
+import { parametersReducer, Param, NewParam } from "./parameters";
 import { 
   useManagerState, 
   useManagerDispatch, 
@@ -19,6 +19,7 @@ import {
 } from "../manager.context";
 import { QueryRevision, findQueryRevision } from './queries';
 
+const debugParamKey = '_debug';
 
 const useElementDimensions = (defaultHeight: number, defaultWidth: number): [number, number, any] => {
   const [height, setHeight] = useState(defaultHeight || 0);
@@ -67,6 +68,27 @@ function QueryExplorer() {
 
   const [mode, setMode] = useState<QueryInputMode>("editor");
   const [params, paramsDispatch] = useReducer(parametersReducer, []);
+
+  useEffect(() => {
+    if (params.find(p => p.key === debugParamKey)) {
+      managerDispatch({type: 'set_debug', debug: true})
+    } else {
+      managerDispatch({type: 'set_debug', debug: false})
+    }
+  }, [params])
+
+  const onDebugChange = (debug: boolean) => {
+    managerDispatch({type: 'set_debug', debug: debug})
+
+    if (debug) {
+      paramsDispatch({type: 'inserted', parameter: NewParam(debugParamKey, true)})
+    } else {
+      const debugParameter = params.find(p => p.key === debugParamKey)
+      if (debugParameter) {
+        paramsDispatch({type: 'deleted', parameter: debugParameter})
+      }
+    }
+  }
 
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
@@ -135,10 +157,11 @@ function QueryExplorer() {
           <div className="query-inputs">
             <div ref={selectorsRef} className="query-inputs__selectors">
               <QuerySelectors 
-                tenants={getTenants(managerState.mappings)} 
+                tenants={getTenants(managerState.mappings)}
+                debug={managerState.debug}
+                onDebugChange={onDebugChange}
                 onModeChange={setMode} 
                 onTenantChange={(tenant) => managerDispatch({type: 'select_tenant', tenant: tenant})}
-                onDebugChange={(debug) => managerDispatch({type: 'set_debug', debug: debug})}
               />
             </div>
 

@@ -140,8 +140,13 @@ function mergeParams(original: Param[], input: Param[]): Param[] {
       continue
     }
 
-    updatedParams.push(input[updatedIndex]);
-    updatedIndex++;
+    const inputedParam = input[updatedIndex];
+
+    // If the param was deleted on editing the input it may not find the index on the input params arrays
+    if (inputedParam) {
+      updatedParams.push(inputedParam);
+      updatedIndex++;
+    }
   }
 
   const newParams = input.slice(updatedIndex, input.length);

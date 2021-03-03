@@ -9,6 +9,7 @@ const PARAMS_MODE: QueryInputMode = "params";
 
 type QuerySelectorsProps = {
   tenants: string[],
+  debug: boolean,
   onModeChange: (mode: QueryInputMode) => void,
   onTenantChange: (tenant: string) => void,
   onDebugChange: (debug: boolean) => void
@@ -44,7 +45,7 @@ function QuerySelector(props: QuerySelectorsProps) {
 
       <div className="query-inputs__debug">
         <label htmlFor="debug">Debug</label>
-        <input onChange={debugSelectorHandler} type="checkbox" id="debug" name="debug" />
+        <input onChange={debugSelectorHandler} type="checkbox" id="debug" name="debug" checked={props.debug} />
       </div>
     </>
   )

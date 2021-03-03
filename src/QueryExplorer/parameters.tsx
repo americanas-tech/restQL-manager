@@ -40,8 +40,8 @@ export const parametersReducer = (state: Param[], action: ChangedParameter): Par
 
 export function stringifyParams(params: Param[]): string {
   return params
-    .filter(p => Boolean(p.key) && Boolean(p.value))
-    .map(p => `${p.key}=${p.value}`)
+    .filter(p => Boolean(p.key))
+    .map(p => `${p.key}${p.value ? "=" + p.value : ""}`)
     .join('&');
 }
 
