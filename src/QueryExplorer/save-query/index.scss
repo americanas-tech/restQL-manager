@@ -1,0 +1,114 @@
+@import 'assets/theme';
+
+.save-query__modal {
+  background-color: $white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.35);
+  margin-top: 10rem;
+}
+
+.save-query__modal:focus {
+  border: none;
+  outline: none;
+}
+
+.save-query__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($color: $black, $alpha: 0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.save-query__modal h2 {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  color: $black;
+  font-size: 2rem;
+}
+
+.save-query__modal__input {
+  border: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  margin: 2rem 0;
+
+  label {
+    font-size: 1.5rem;
+    margin-right: 1.5rem;
+  }
+
+  input {
+    font-size: 1.5rem;
+    height: 2.5rem;
+    padding: 0.1rem 0.8rem;
+    width: 40rem;
+    border: solid 2px lighten($color: $gray, $amount: 0.1);
+    border-radius: 6px;
+  }
+}
+
+.save-query__modal__actions {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 0.5rem;
+  border-top: solid 1px lighten($color: $gray, $amount: 0.1);
+
+  button {
+    margin: 1.2rem 2rem;
+    padding: 0.8rem 0.5rem;
+    width: 8rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  button:focus {
+    outline: none;
+  }
+}
+
+.save-query__modal__error {
+  color: $secondary;
+  font-size: 1rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.save-query__modal__actions--primary {
+  border-radius: 6px;
+  border: solid 2px lighten($color: $secondary, $amount: 0.1);
+  background-color: $secondary;
+  color: $white;
+}
+
+.save-query__modal__actions--primary:disabled {
+  cursor: not-allowed;
+  border: none;
+  background-color: rgba($color: $secondary, $alpha: 0.5);
+}
+
+.save-query__modal__actions--secondary {
+  border-radius: 6px;
+  border: solid 2px lighten($color: $accent, $amount: 0.1);
+  background-color: darken($color: $accent, $amount: 0.9);
+  color: $white;
+}
+
+.save-query__modal__actions--secondary:disabled {
+  cursor: not-allowed;
+  border: none;
+  background-color: rgba($color: $accent, $alpha: 0.5);
+}

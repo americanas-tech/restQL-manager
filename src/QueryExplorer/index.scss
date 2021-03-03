@@ -1,0 +1,67 @@
+@import 'assets/theme';
+
+.query-explorer__controls--wrapper {
+  height: 12vh;
+}
+
+.query-explorer__input-output--wrapper {
+  max-width: 100vw;
+  max-height: 100vh;
+
+  height: 88vh;
+  display: flex;
+}
+
+.query-explorer__result {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: scroll;
+  padding: 0.8rem;
+}
+
+.query-explorer__result--running {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  right: 0;
+  z-index: 2;
+
+  background-color: rgba($color: #eee, $alpha: 0.8);
+  background-image: url('./loading-spinner.svg');
+  background-size: 80px 80px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: scroll;
+}
+
+.query-inputs {
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+
+  border-right: 4px solid $secondary;
+}
+
+.query-explorer__editor {
+  width: 100%;
+  flex-grow: 1;
+
+  .CodeMirror * {
+    font-size: 1.3rem;
+  }
+}
+
+.query-inputs__selectors {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+
+  font-size: 1.2rem;
+  color: $dark-gray;
+  background-color: $white;
+  border-bottom: 4px solid $secondary;
+}

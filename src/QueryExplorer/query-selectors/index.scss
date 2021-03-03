@@ -1,0 +1,35 @@
+@import 'assets/theme';
+
+.query-inputs__mode-selector {
+  width: 9rem;
+  border-radius: 5px;
+  padding: 0.2rem;
+  background-color: $white;
+}
+
+.query-inputs__tenant-selector {
+  > label {
+    margin-right: 0.4rem;
+  }
+
+  > select {
+    background-color: $white;
+    width: 14rem;
+    border-radius: 5px;
+    padding: 0.2rem;
+  }
+}
+
+.query-inputs__debug {
+  display: flex;
+  align-items: center;
+
+  > label {
+    margin-right: 0.4rem;
+  }
+
+  > input {
+    width: 20px;
+    height: 20px;
+  }
+}
