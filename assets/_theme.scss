@@ -8,12 +8,7 @@ $dark-gray: #333333;
 $white: #fdfdfd;
 $black: #20201e;
 
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  src: url('https://fonts.googleapis.com/css2?family=Roboto&display=swap') format('truetype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
 * {
   font-family: 'Roboto', sans-serif;
