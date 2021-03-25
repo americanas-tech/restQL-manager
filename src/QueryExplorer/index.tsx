@@ -190,6 +190,7 @@ function QueryExplorer() {
         <SideMenuModal 
           isOpen={sideMenuOpen}
           queriesByNamespace={managerState.queries}
+          archivedQueriesByNamespace={managerState.archivedQueries}
           mappings={managerState.mappings}
           onClose={closeSideMenu}
         />

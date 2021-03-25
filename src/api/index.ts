@@ -57,8 +57,10 @@ type FetchQueriesFromNamespace = {
   queries: {
     namespace: string,
     name: string,
+    archived: boolean,
     revisions: {
       text: string,
+      archived: boolean,
       revision: number
     }[]
   }[]
@@ -69,6 +71,18 @@ export async function fetchQueriesFromNamespace(namespace: string): Promise<Fetc
     method: 'GET',
     baseURL: adminUrl,
     url: `/namespace/${namespace}/query`
+  });
+
+  const data = response.data as FetchQueriesFromNamespace;
+
+  return data;
+}
+
+export async function fetchArchivedQueriesFromNamespace(namespace: string): Promise<FetchQueriesFromNamespace> {
+  const response = await axios({
+    method: 'GET',
+    baseURL: adminUrl,
+    url: `/namespace/${namespace}/query?archived=true`
   });
 
   const data = response.data as FetchQueriesFromNamespace;
@@ -123,6 +137,38 @@ export async function setResource(tenant: string, name: string, url: string, aut
       data: {
         url: url
       }
+    });
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export async function archiveQuery(namespace: string, name: string) {
+  try {
+    await axios({
+      method: 'POST',
+      baseURL: adminUrl,
+      url: `/namespace/${namespace}/query/${name}`,
+      data: {archived: true},
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
+  } catch (error) {
+    return error.response.data;
+  }
+}
+
+export async function archiveRevision(namespace: string, name: string, revision: number) {
+  try {
+    await axios({
+      method: 'POST',
+      baseURL: adminUrl,
+      url: `/namespace/${namespace}/query/${name}/revision/${revision}`,
+      data: {archived: true},
+      headers: {
+        "Content-Type": "application/json"
+      },
     });
   } catch (error) {
     return error.response.data;

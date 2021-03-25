@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery, setResource } from "./api";
+import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery, setResource, fetchArchivedQueriesFromNamespace } from "./api";
 import { Param } from "./QueryExplorer/parameters";
 
 export type MappingsByTenant = {
@@ -13,6 +13,8 @@ export type ManagerState = {
   status: "initial" | "loading" | "completed" | "error",
   mappings: MappingsByTenant,
   queries: Record<string, Query[]>,
+  archivedQueries: Record<string, Query[]>,
+  selectedArchiveStatus: boolean,
   selectedQuery: QueryRevision | null,
   selectedTenant: string,
   currentQueryText: string,
@@ -35,6 +37,8 @@ const initialState: ManagerState = {
   status: "initial",
   mappings: {},
   queries: {},
+  archivedQueries: {},
+  selectedArchiveStatus: false,
   selectedQuery: null,
   selectedTenant: "",
   currentQueryText: "",
@@ -55,7 +59,7 @@ const initialState: ManagerState = {
 
 type ManagerAction = 
   {type: 'initialization_started'}
-  | {type: 'initialization_completed', queries: Record<string, Query[]>, mappingsByTenant: MappingsByTenant}
+  | {type: 'initialization_completed', queries: Record<string, Query[]>, archivedQueries: Record<string, Query[]>, mappingsByTenant: MappingsByTenant}
   | {type: 'refresh_queries', queries: Record<string, Query[]>}
   | {type: 'select_query', queryRevision: QueryRevision}
   | {type: 'set_debug', debug: boolean}
@@ -88,6 +92,7 @@ function managerReducer(state: ManagerState, action: ManagerAction): ManagerStat
         mappings: action.mappingsByTenant,
         queries: action.queries,
         selectedTenant: tenants[0],
+        archivedQueries: action.archivedQueries,
       };
     case 'refresh_queries':
       return {
@@ -165,9 +170,18 @@ export async function initializeManager(dispatch: Dispatch) {
   dispatch({type: "initialization_started"});
 
   const mappingsByTenant = await fetchMappingsByTenant();
-  const queriesByNamespace = await fetchNamespacesAndQueries();
+  const namespaces = await fetchNamespaces();
+  const [queriesByNamespace, archivedQueriesByNamespace] = await Promise.all([
+    fetchQueries(namespaces), 
+    fetchArchivedQueries(namespaces)
+  ]);
 
-  dispatch({type: "initialization_completed", mappingsByTenant: mappingsByTenant, queries: queriesByNamespace});
+  dispatch({
+    type: "initialization_completed", 
+    mappingsByTenant: mappingsByTenant, 
+    queries: queriesByNamespace,
+    archivedQueries: archivedQueriesByNamespace,
+  });
 }
 
 export async function runQueryOnRestql(dispatch: Dispatch, state: ManagerState, params: Param[]): Promise<void> {
@@ -198,7 +212,8 @@ export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState,
   try {
     await saveQuery(queryNamespace, queryName, queryText);
     
-    const queriesByNamespace = await fetchNamespacesAndQueries();
+    const namespaces = await fetchNamespaces();
+    const queriesByNamespace = await fetchQueries(namespaces);
     dispatch({type:'refresh_queries', queries: queriesByNamespace});
 
     const newRevision = getNewRevision(queriesByNamespace, queryNamespace, queryName);
@@ -232,23 +247,36 @@ function getNewRevision(queriesByNamespace: Record<string, Query[]>, namespace: 
   const query = namespacedQueries.find(q => q.name === name) as Query;
 
   const lastRevisionNumber = lastRevision(query.revisions);
-  const rev = query.revisions[lastRevisionNumber-1];
+  const rev = query.revisions.find(r => r.revision == lastRevisionNumber) as {text: string, archived: boolean, revision: number};
 
   return {
     namespace: namespace,
     name: name,
     revision: rev.revision,
     text: rev.text,
+    archived: rev.archived,
   }
 }
 
-async function fetchNamespacesAndQueries() {
-  const namespaces = await fetchNamespaces();
+async function fetchQueries(namespaces: string[]) {
   const queriesForNamespace = await Promise.all(namespaces.map(n => fetchQueriesFromNamespace(n)))
   
   const queriesByNamespace: Record<string, Query[]> = {};
   for (const namespaceQueries of queriesForNamespace) {
     queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
+  }
+
+  return queriesByNamespace
+}
+
+async function fetchArchivedQueries(namespaces: string[]) {
+  const queriesForNamespace = await Promise.all(namespaces.map(n => fetchArchivedQueriesFromNamespace(n)))
+  
+  const queriesByNamespace: Record<string, Query[]> = {};
+  for (const namespaceQueries of queriesForNamespace) {
+    if (namespaceQueries.queries.length > 0) {
+      queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
+    }
   }
 
   return queriesByNamespace

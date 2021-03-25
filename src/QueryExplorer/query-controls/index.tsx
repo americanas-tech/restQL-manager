@@ -248,8 +248,8 @@ function getOptions(queries: Record<string, Query[]>): option[] {
   return options;
 }
 
-function buildOptionFromQuery(q: Query, rev: {revision: number, text: string}): option {
-  const qr = {name: q.name, namespace: q.namespace, revision: rev.revision, text: rev.text};
+function buildOptionFromQuery(q: Query, rev: {revision: number, archived: boolean, text: string}): option {
+  const qr = {name: q.name, namespace: q.namespace, revision: rev.revision, archived: rev.archived, text: rev.text};
   
   return {
     value: qr,

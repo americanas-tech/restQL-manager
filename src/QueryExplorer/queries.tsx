@@ -2,8 +2,10 @@
 export type Query = {
   namespace: string
   name: string
+  archived: boolean,
   revisions: {
     text: string,
+    archived: boolean,
     revision: number
   }[]
 }
@@ -12,7 +14,8 @@ export type QueryRevision = {
   namespace: string,
   name: string,
   text: string,
-  revision: number
+  revision: number,
+  archived: boolean,
 }
 
 export function lastRevision(revisions: {text: string, revision: number}[]): number {
@@ -40,6 +43,7 @@ export function findQueryRevision(namespace: string, queryName: string, revision
       name: queryName,
       text: rev.text,
       revision: rev.revision,
+      archived: rev.archived,
     }
   }
 
@@ -53,6 +57,7 @@ export function findQueryRevision(namespace: string, queryName: string, revision
       name: queryName,
       text: rev.text,
       revision: rev.revision,
+      archived: rev.archived,
     }
   }
 
@@ -61,5 +66,6 @@ export function findQueryRevision(namespace: string, queryName: string, revision
     name: queryName,
     text: chosenRevision.text,
     revision: chosenRevision.revision,
+    archived: chosenRevision.archived,
   }
 }

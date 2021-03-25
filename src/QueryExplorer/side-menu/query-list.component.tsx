@@ -5,14 +5,18 @@ import './query-list.scss';
 
 type QueryListProps = {
   queriesByNamespace: Record<string, Query[]>,
+  archivedQueriesByNamespace: Record<string, Query[]>,
   onQuerySelection: () => void,
 }
 
 function QueryList(props: QueryListProps) {
-  const {queriesByNamespace} = props;
+  const {queriesByNamespace, archivedQueriesByNamespace} = props;
+  
+  const archivedNamespaces = Object.keys(archivedQueriesByNamespace).sort();
   const allNamespaces = Object.keys(queriesByNamespace).sort();
   const [namespaces, setNamespaces] = useState(allNamespaces);
-  
+
+  const [showArchived, setShowArchived] = useState(false);
   const [selectedNamespace, setSelectedNamespace] = useState("");
   const [queryFilter, setQueryFilter] = useState("");
 
@@ -31,8 +35,38 @@ function QueryList(props: QueryListProps) {
     setSearch(search);
   }
 
+  const updateShowArchived = (show: boolean) => {
+    const newNamespaces = show ? archivedNamespaces : allNamespaces;
+    setNamespaces(newNamespaces);
+    
+    setSelectedNamespace("");
+    setSearch("");
+    setQueryFilter("");
+    setShowArchived(show);
+  }
+
+  const getQueriesByNamespace = (namespace: string) => {
+    if (showArchived) {
+      return archivedQueriesByNamespace[namespace];
+    } else {
+      return queriesByNamespace[namespace];
+    }
+  }
+
   return (
     <section className="side-menu__queries">
+      <section className="side-menu__archived">
+        <label>Archived</label>
+        <div className="archived-switch">
+          <input 
+            id="archived"
+            type="checkbox"
+            className="archived-switch__input" 
+            onClick={(e) => updateShowArchived(e.currentTarget.checked)}
+          />
+          <label htmlFor="archived" className="archived-switch__body">Switch</label>
+        </div>
+      </section>
       <input 
         type="text" 
         name="query-search" 
@@ -43,15 +77,15 @@ function QueryList(props: QueryListProps) {
       />
       <ul className="side-menu__query-list">
         {namespaces.map(n => 
-          <NamespacedQueries 
-            key={n} 
-            onQuerySelection={props.onQuerySelection} 
-            namespace={n} 
-            selectedNamespace={selectedNamespace} 
-            queryFilter={queryFilter}  
-            queries={queriesByNamespace[n]} 
-            />
-          )}
+            <NamespacedQueries 
+              key={n} 
+              onQuerySelection={props.onQuerySelection} 
+              namespace={n} 
+              selectedNamespace={selectedNamespace} 
+              queryFilter={queryFilter}  
+              queries={getQueriesByNamespace(n)} 
+              />
+        )}
       </ul>
     </section>
   );
