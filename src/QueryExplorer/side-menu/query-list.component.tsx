@@ -42,7 +42,16 @@ function QueryList(props: QueryListProps) {
         onChange={(e) => updateSearch(e.currentTarget.value)}
       />
       <ul className="side-menu__query-list">
-        {namespaces.map(n => <NamespacedQueries onQuerySelection={props.onQuerySelection} key={n} namespace={n} selectedNamespace={selectedNamespace} queryFilter={queryFilter}  queries={queriesByNamespace[n]} />)}
+        {namespaces.map(n => 
+          <NamespacedQueries 
+            key={n} 
+            onQuerySelection={props.onQuerySelection} 
+            namespace={n} 
+            selectedNamespace={selectedNamespace} 
+            queryFilter={queryFilter}  
+            queries={queriesByNamespace[n]} 
+            />
+          )}
       </ul>
     </section>
   );
@@ -75,14 +84,37 @@ function NamespacedQueries(props: NamespacedQueriesProps) {
     <li key={namespace} className="side-menu__query-list__namespace">
       <span onClick={() => setOpen(!open)}>{namespace}</span>
       <ul className={"side-menu__query-list__namespaced-queries" + (open ? " side-menu__query-list__namespaced-queries--open" : "")}>
-        {filteredQueries.map(q => (
-          <li key={q.name} className="side-menu__query-list__query">
-            <Link onClick={props.onQuerySelection} to={`/query/${namespace}/${q.name}/${lastRevision(q.revisions)}`}>{q.name}</Link>
-          </li>
-        ))}
+        {filteredQueries.map(q => renderLink(q, props.onQuerySelection))}
       </ul>
     </li>
   );
+}
+
+function renderLink(query: Query, onQuerySelection: () => void) {
+  const target = query.revisions.length === 0 ? "#" : `/query/${query.namespace}/${query.name}/${lastRevision(query.revisions)}`;
+  const style = query.revisions.length === 0 ? "side-menu__query-list__query side-menu__query-list__query--disabled" : "side-menu__query-list__query";
+
+  if (query.revisions.length === 0) {
+    return (
+      <li key={query.name} className={style}>
+      <a 
+        href={target}
+        onClick={() => alert('This query has no eligible revision, please change the archived filter to see its revisions')}>
+          {query.name}
+      </a>
+    </li>
+    )
+  }
+
+  return (
+    <li key={query.name} className={style}>
+      <Link 
+        to={target}
+        onClick={onQuerySelection}>
+          {query.name}
+      </Link>
+    </li>
+  )
 }
 
 export default QueryList;
