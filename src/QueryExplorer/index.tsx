@@ -16,8 +16,9 @@ import {
   runQueryOnRestql,
   saveQueryOnRestql,
   getTenants,
+  ManagerState,
 } from "../manager.context";
-import { QueryRevision, findQueryRevision } from './queries';
+import { QueryRevision, findQueryRevision, findLastQueryRevision } from './queries';
 
 const debugParamKey = '_debug';
 
@@ -41,11 +42,11 @@ function QueryExplorer() {
 
   const routeParams = useParams<{namespace: string, queryName: string, revision: string}>();
   useEffect(() => {
-    const qr = findQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.queries);
+    const qr = getSelectedOrLastQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, managerState)
     if (!qr) {
       return
     }
-
+    
     managerDispatch({type: "select_query", queryRevision: qr});
   }, [routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.status]);
 
@@ -196,6 +197,32 @@ function QueryExplorer() {
         />
     </>
   )
+}
+
+function getSelectedOrLastQueryRevision(namespace: string, queryName: string, revision: string | null, state: ManagerState):  QueryRevision | null {
+    if (revision) {
+      const qr = findQueryRevision(namespace, queryName, revision, state.queries);
+      if (qr) {
+        return qr
+      }
+      
+      const archivedQr = findQueryRevision(namespace, queryName, revision, state.archivedQueries);
+      if (archivedQr) {
+        return archivedQr
+      }
+    }
+    
+    const qr = findLastQueryRevision(namespace, queryName, state.queries);
+    if (qr) {
+      return qr
+    }
+
+    const archivedQr = findLastQueryRevision(namespace, queryName, state.archivedQueries);
+    if (archivedQr) {
+      return archivedQr
+    }
+
+    return null
 }
 
 export default QueryExplorer
