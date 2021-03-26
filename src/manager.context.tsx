@@ -215,9 +215,6 @@ export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState,
     const namespaces = await fetchNamespaces();
     const queriesByNamespace = await fetchQueries(namespaces);
     dispatch({type:'refresh_queries', queries: queriesByNamespace});
-
-    const newRevision = getNewRevision(queriesByNamespace, queryNamespace, queryName);
-    dispatch({type: 'select_query', queryRevision: newRevision});
     
     dispatch({type:'save_query_finished'});
   } catch (error) {
