@@ -129,11 +129,13 @@ function renderLink(query: Query, onQuerySelection: () => void) {
   const style = query.revisions.length === 0 ? "side-menu__query-list__query side-menu__query-list__query--disabled" : "side-menu__query-list__query";
 
   if (query.revisions.length === 0) {
+    const status = query.archived ? 'archived' : 'unarchived';
+
     return (
       <li key={query.name} className={style}>
       <a 
         href={target}
-        onClick={() => alert('This query has no eligible revision, please change the archived filter to see its revisions')}>
+        onClick={() => alert(`This query does not have any ${status} revision, please change the archived filter to see other revisions`)}>
           {query.name}
       </a>
     </li>
