@@ -217,7 +217,12 @@ function QueryControls(props: QueryControlsProps) {
   const {queries, selectedQuery} = useManagerState()
   const options = getOptions(queries);
 
-  const [showArchiveActions, setShowArchiveActions] = useState(false)
+  const [showArchiveActions, setShowArchiveActions] = useState(false);
+
+  const handleAction = (handler: () => void) => () => {
+    setShowArchiveActions(false);
+    handler()
+  }
 
   return (
     <header className="query-controls--wrapper">
@@ -258,8 +263,8 @@ function QueryControls(props: QueryControlsProps) {
               (
                 <ul 
                   className={"query-controls__actions__mutation__archive " + (props.disableActions.archive ? "query-controls__actions__mutation__archive--disabled" : "")}>
-                  <li onClick={props.onArchiveRevision}>Archive revision</li>
-                  <li onClick={props.onArchiveQuery}>Archive query</li> 
+                  <li onClick={handleAction(props.onArchiveRevision)}>Archive revision</li>
+                  <li onClick={handleAction(props.onArchiveQuery)}>Archive query</li> 
                 </ul>
               )}
           </div>

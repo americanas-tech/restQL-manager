@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
-import { lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
+import { findQueryRevision, lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
 import { 
   fetchNamespaces, 
   fetchQueriesFromNamespace, 
@@ -126,6 +126,7 @@ function managerReducer(state: ManagerState, action: ManagerAction): ManagerStat
       return {
         ...state, 
         queries: action.queries,
+        archivedQueries: action.archivedQueries,
       };
     case 'select_query':
       return {...state, selectedQuery: action.queryRevision, currentQueryText: action.queryRevision.text};
@@ -276,7 +277,11 @@ export async function archiveSelectedQuery(dispatch: Dispatch, state: ManagerSta
 
   try {
     await archiveQuery(query.namespace, query.name);
-    await refreshQueries(dispatch);
+    const refreshed = await refreshQueries(dispatch);
+    const refreshedSelectedQuery = findQueryRevision(query.namespace, query.name, query.revision.toString(), refreshed.archivedQueries);
+    if (refreshedSelectedQuery) {
+      dispatch({type: "select_query", queryRevision: refreshedSelectedQuery});
+    }
 
     dispatch({type: 'set_confirmation_modal', state: {
       status: 'stale',
@@ -299,7 +304,11 @@ export async function archiveSelectedRevision(dispatch: Dispatch, state: Manager
 
   try {
     await archiveRevision(query.namespace, query.name, query.revision);
-    await refreshQueries(dispatch);
+    const refreshed = await refreshQueries(dispatch);
+    const refreshedSelectedQuery = findQueryRevision(query.namespace, query.name, query.revision.toString(), refreshed.archivedQueries);
+    if (refreshedSelectedQuery) {
+      dispatch({type: "select_query", queryRevision: refreshedSelectedQuery});
+    }
     
     dispatch({type: 'set_confirmation_modal', state: {
       status: 'stale',
@@ -357,4 +366,6 @@ async function refreshQueries(dispatch: Dispatch) {
   ]);
   
   dispatch({type:'refresh_queries', queries: queriesByNamespace, archivedQueries: archivedQueriesByNamespace});
+
+  return {queries: queriesByNamespace, archivedQueries: archivedQueriesByNamespace}
 }
