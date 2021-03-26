@@ -1,6 +1,17 @@
 import { createContext, ReactNode, useContext, useReducer } from "react";
 import { lastRevision, Query, QueryRevision } from "./QueryExplorer/queries";
-import { fetchNamespaces, fetchQueriesFromNamespace, fetchTenants, fetchMappingsFromTenant, runQuery, saveQuery, setResource, fetchArchivedQueriesFromNamespace } from "./api";
+import { 
+  fetchNamespaces, 
+  fetchQueriesFromNamespace, 
+  fetchTenants, 
+  fetchMappingsFromTenant, 
+  runQuery, 
+  saveQuery, 
+  setResource, 
+  fetchArchivedQueriesFromNamespace,
+  archiveQuery, 
+  archiveRevision,
+} from "./api";
 import { Param } from "./QueryExplorer/parameters";
 
 export type MappingsByTenant = {
@@ -8,6 +19,14 @@ export type MappingsByTenant = {
     [resource: string]: {url: string, source: string}
   }
 };
+
+export type ConfirmationModalState = {
+  status: 'stale' | 'saving',
+  message: string,
+  error?: string,
+  opened: boolean,
+  handler: () => void,
+}
 
 export type ManagerState = {
   status: "initial" | "loading" | "completed" | "error",
@@ -30,7 +49,8 @@ export type ManagerState = {
   manageResourceModal: {
     status: 'stale' | 'saving',
     error: string
-  }
+  },
+  confirmationModal: ConfirmationModalState,
 }
 
 const initialState: ManagerState = {
@@ -54,13 +74,20 @@ const initialState: ManagerState = {
   manageResourceModal: {
     status: 'stale',
     error: ''
+  },
+  confirmationModal: {
+    status: 'stale',
+    message: "", 
+    error: "",
+    opened: false, 
+    handler: () => {},
   }
 }
 
 type ManagerAction = 
   {type: 'initialization_started'}
   | {type: 'initialization_completed', queries: Record<string, Query[]>, archivedQueries: Record<string, Query[]>, mappingsByTenant: MappingsByTenant}
-  | {type: 'refresh_queries', queries: Record<string, Query[]>}
+  | {type: 'refresh_queries', queries: Record<string, Query[]>, archivedQueries: Record<string, Query[]>}
   | {type: 'select_query', queryRevision: QueryRevision}
   | {type: 'set_debug', debug: boolean}
   | {type: 'updated_query_text', text: string}
@@ -74,6 +101,7 @@ type ManagerAction =
   | {type: 'set_resource_finished'}
   | {type: 'set_resource_failed', error: string}
   | {type: 'refresh_mappings', mappings: MappingsByTenant}
+  | {type: 'set_confirmation_modal', state: Partial<ConfirmationModalState>}
   
 type Dispatch = React.Dispatch<ManagerAction>;
 
@@ -128,6 +156,8 @@ function managerReducer(state: ManagerState, action: ManagerAction): ManagerStat
       return {...state, manageResourceModal: {status: 'stale', error: action.error}}
     case 'refresh_mappings':
       return {...state, mappings: action.mappings}
+    case 'set_confirmation_modal':
+      return {...state, confirmationModal: {...state.confirmationModal, ...action.state}}
     default:
       return state;
   }
@@ -212,9 +242,7 @@ export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState,
   try {
     await saveQuery(queryNamespace, queryName, queryText);
     
-    const namespaces = await fetchNamespaces();
-    const queriesByNamespace = await fetchQueries(namespaces);
-    dispatch({type:'refresh_queries', queries: queriesByNamespace});
+    await refreshQueries(dispatch);
     
     dispatch({type:'save_query_finished'});
   } catch (error) {
@@ -238,20 +266,50 @@ export async function setResourceOnRestql(dispatch: Dispatch, tenant: string, re
   }
 }
 
-function getNewRevision(queriesByNamespace: Record<string, Query[]>, namespace: string, name: string): QueryRevision {
-  const namespacedQueries = queriesByNamespace[namespace];
+export async function archiveSelectedQuery(dispatch: Dispatch, state: ManagerState) {
+  console.log('archiving query')
+  dispatch({type: 'set_confirmation_modal', state: {
+    status: 'saving'
+  }})
 
-  const query = namespacedQueries.find(q => q.name === name) as Query;
+  const query = state.selectedQuery as QueryRevision;
 
-  const lastRevisionNumber = lastRevision(query.revisions);
-  const rev = query.revisions.find(r => r.revision == lastRevisionNumber) as {text: string, archived: boolean, revision: number};
+  try {
+    await archiveQuery(query.namespace, query.name);
+    await refreshQueries(dispatch);
 
-  return {
-    namespace: namespace,
-    name: name,
-    revision: rev.revision,
-    text: rev.text,
-    archived: rev.archived,
+    dispatch({type: 'set_confirmation_modal', state: {
+      status: 'stale',
+      opened: false,
+    }})
+  } catch (error) {
+    dispatch({type: 'set_confirmation_modal', state: {
+      status: 'stale',
+      error: error.message,
+    }})
+  }
+}
+
+export async function archiveSelectedRevision(dispatch: Dispatch, state: ManagerState) {
+  dispatch({type: 'set_confirmation_modal', state: {
+    status: 'saving'
+  }})
+
+  const query = state.selectedQuery as QueryRevision;
+
+  try {
+    await archiveRevision(query.namespace, query.name, query.revision);
+    await refreshQueries(dispatch);
+    
+    dispatch({type: 'set_confirmation_modal', state: {
+      status: 'stale',
+      opened: false,
+    }})
+  } catch (error) {
+    dispatch({type: 'set_confirmation_modal', state: {
+      status: 'stale',
+      error: error.message,
+    }})
   }
 }
 
@@ -289,4 +347,14 @@ async function fetchMappingsByTenant() {
   }
 
   return mappinsByTenant;
+}
+
+async function refreshQueries(dispatch: Dispatch) {
+  const namespaces = await fetchNamespaces();
+  const [queriesByNamespace, archivedQueriesByNamespace] = await Promise.all([
+    fetchQueries(namespaces), 
+    fetchArchivedQueries(namespaces)
+  ]);
+  
+  dispatch({type:'refresh_queries', queries: queriesByNamespace, archivedQueries: archivedQueriesByNamespace});
 }

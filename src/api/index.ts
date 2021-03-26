@@ -146,7 +146,7 @@ export async function setResource(tenant: string, name: string, url: string, aut
 export async function archiveQuery(namespace: string, name: string) {
   try {
     await axios({
-      method: 'POST',
+      method: 'PATCH',
       baseURL: adminUrl,
       url: `/namespace/${namespace}/query/${name}`,
       data: {archived: true},
@@ -155,14 +155,14 @@ export async function archiveQuery(namespace: string, name: string) {
       },
     });
   } catch (error) {
-    return error.response.data;
+    throw new Error("failed to execute action");
   }
 }
 
 export async function archiveRevision(namespace: string, name: string, revision: number) {
   try {
     await axios({
-      method: 'POST',
+      method: 'PATCH',
       baseURL: adminUrl,
       url: `/namespace/${namespace}/query/${name}/revision/${revision}`,
       data: {archived: true},
@@ -171,6 +171,6 @@ export async function archiveRevision(namespace: string, name: string, revision:
       },
     });
   } catch (error) {
-    return error.response.data;
+    throw new Error("failed to execute action");
   }
 }

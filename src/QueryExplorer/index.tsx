@@ -9,6 +9,7 @@ import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
 import SaveQueryModal from "./save-query";
 import SideMenuModal from './side-menu';
+import ConfirmationModal from "./confirmation-modal";
 import { parametersReducer, Param, NewParam } from "./parameters";
 import { 
   useManagerState, 
@@ -17,6 +18,8 @@ import {
   saveQueryOnRestql,
   getTenants,
   ManagerState,
+  archiveSelectedQuery,
+  archiveSelectedRevision,
 } from "../manager.context";
 import { QueryRevision, findQueryRevision, findLastQueryRevision } from './queries';
 
@@ -155,8 +158,24 @@ function QueryExplorer() {
             onChange={queryControlChangeHandler} 
             onRun={() => runQueryOnRestql(managerDispatch, managerState, params)}
             onSave={openSaveQueryModal}
-            onArchiveQuery={() => {}}
-            onArchiveRevision={() => {}}
+            onArchiveQuery={() => managerDispatch({
+              type: 'set_confirmation_modal',
+              state: {
+                status: 'stale',
+                message: "Are you sure you want to archive this query?",
+                opened: true,
+                handler: () => archiveSelectedQuery(managerDispatch, managerState),
+              }
+            })}
+            onArchiveRevision={() => managerDispatch({
+              type: "set_confirmation_modal",
+              state: {
+                status: "stale",
+                message: "Are you sure you want to archive this revision?",
+                opened: true,
+                handler: () => archiveSelectedRevision(managerDispatch, managerState),
+              }
+            })}
           />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
@@ -197,6 +216,17 @@ function QueryExplorer() {
           archivedQueriesByNamespace={managerState.archivedQueries}
           mappings={managerState.mappings}
           onClose={closeSideMenu}
+        />
+        <ConfirmationModal 
+          onConfirm={managerState.confirmationModal.handler}
+          message={managerState.confirmationModal.message}
+          error={managerState.confirmationModal.error}
+          disabled={managerState.confirmationModal.status === 'saving'}
+          isOpen={managerState.confirmationModal.opened}
+          onClose={() => managerDispatch({
+            type: 'set_confirmation_modal', 
+            state: {error: "", opened: false},
+          })}
         />
     </>
   )
