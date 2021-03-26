@@ -149,11 +149,14 @@ function QueryExplorer() {
             disableActions={{
               run: managerState.queryResult.status === 'running',
               save: !managerState.currentQueryText || managerState.queryResult.status === 'running',
+              archive: !managerState.selectedQuery || managerState.selectedQuery?.archived
             }}
             onMenuOpen={openSideMenu}
             onChange={queryControlChangeHandler} 
             onRun={() => runQueryOnRestql(managerDispatch, managerState, params)}
             onSave={openSaveQueryModal}
+            onArchiveQuery={() => {}}
+            onArchiveRevision={() => {}}
           />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">

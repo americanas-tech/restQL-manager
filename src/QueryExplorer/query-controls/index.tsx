@@ -4,6 +4,7 @@ import { FixedSizeList as List } from "react-window";
 
 import './index.scss';
 import { ReactComponent as MenuIcon } from './menu.svg';
+import { ReactComponent as DownIcon } from './down.svg';
 import Select, {components, InputActionMeta, InputProps} from 'react-select';
 import { useManagerState } from "../../manager.context";
 import { Query, QueryRevision } from "../queries";
@@ -203,35 +204,67 @@ const disableNoOptionsMessage = () => null;
 
 type QueryControlsProps = {
   params: Param[],
-  disableActions: {run: boolean, save: boolean},
+  disableActions: {run: boolean, save: boolean, archive: boolean},
   onChange: (query: QueryRevision, params: Param[]) => void,
   onRun: () => void,
   onSave: () => void,
-  onMenuOpen: () => void
+  onMenuOpen: () => void,
+  onArchiveQuery: () => void,
+  onArchiveRevision: () => void,
 }
 
 function QueryControls(props: QueryControlsProps) {
   const {queries, selectedQuery} = useManagerState()
   const options = getOptions(queries);
 
+  const [showArchiveActions, setShowArchiveActions] = useState(false)
+
   return (
-    <header className="query-controls">
-      <div>
-        <MenuIcon style={{cursor: 'pointer'}} onClick={props.onMenuOpen} className="query-controls__menu" />
-      </div>
-      <div className="query-controls__selector--wrapper">
-        <p>{"/run-query"}</p>
-        <EditableSelect 
-          options={options}
-          selectedQuery={selectedQuery}
-          params={props.params}
-          onChange={props.onChange}
-        />
-      </div>
-      <div className="query-controls__actions--wrapper">
-        <button disabled={props.disableActions.run} onClick={props.onRun}>Run</button>
-        <button disabled={props.disableActions.save} onClick={props.onSave}>Save</button>
-      </div>
+    <header className="query-controls--wrapper">
+      {selectedQuery?.archived && <p className="query-controls__archived-alert">This query is archived!</p>}
+      <nav className="query-controls">
+        <div>
+          <MenuIcon style={{cursor: 'pointer'}} onClick={props.onMenuOpen} className="query-controls__menu" />
+        </div>
+        <div className="query-controls__selector--wrapper">
+          <p>{"/run-query"}</p>
+          <EditableSelect 
+            options={options}
+            selectedQuery={selectedQuery}
+            params={props.params}
+            onChange={props.onChange}
+          />
+          
+        </div>
+        <div className="query-controls__actions--wrapper">
+          <button className="query-controls__actions__run" disabled={props.disableActions.run} onClick={props.onRun}>Run</button>
+          <div className="query-controls__actions__mutation">
+            <div className="query-controls__actions__mutation__primary-actions">
+              <button 
+                className={"query-controls__actions__save " + (showArchiveActions ? "query-controls__actions__save--archive-open" : "")} 
+                disabled={props.disableActions.save} 
+                onClick={props.onSave}>
+                  Save
+              </button>
+              <button 
+                className={"query-controls__actions__mutation__menu " + (showArchiveActions ? "query-controls__actions__save--archive-open" : "")}
+                disabled={props.disableActions.save} 
+                onClick={() => setShowArchiveActions(!showArchiveActions)}
+              >
+                <DownIcon className="query-controls__actions__mutation__menu__icon" />
+              </button>
+            </div>
+            {showArchiveActions && 
+              (
+                <ul 
+                  className={"query-controls__actions__mutation__archive " + (props.disableActions.archive ? "query-controls__actions__mutation__archive--disabled" : "")}>
+                  <li onClick={props.onArchiveRevision}>Archive revision</li>
+                  <li onClick={props.onArchiveQuery}>Archive query</li> 
+                </ul>
+              )}
+          </div>
+        </div>
+      </nav>
     </header>
   )
 }
