@@ -28,7 +28,10 @@ export const parametersReducer = (state: Param[], action: ChangedParameter): Par
     case "inserted":
       return [...state, action.parameter];
     case "deleted":
-      return state.filter((p) => p.id !== action.parameter.id);
+      console.log('reduce deleted', state, action)
+      const x = state.filter((p) => p.id !== action.parameter.id);
+      console.log('new state', x)
+      return x
     case "edited":
       return state.map(p => p.id === action.parameter.id ? action.parameter : p);
     case 'replaced':

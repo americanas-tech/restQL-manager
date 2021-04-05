@@ -12,6 +12,7 @@ export type ParameterEditorProps = {
 
 function ParameterEditor(props: ParameterEditorProps) {
   const deleteParamHandler = (param: Param) => {
+    console.log('deleted', param);
     props.onChange({type: "deleted", parameter: param});
   }
 
