@@ -67,7 +67,8 @@ function EditableSelect(props: EditableSelectProps) {
       const newInputValue = Boolean(queryParams) ? `${option.label}?${queryParams}` : option.label;
       setInputValue(newInputValue);
     } else {
-      setInputValue(`?${queryParams}`);
+      const newInputValue = Boolean(queryParams) ? `?${queryParams}` : ''
+      setInputValue(newInputValue);
     }
   }, [queryParams]);
 
