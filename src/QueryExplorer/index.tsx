@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer, useMemo, useCallback } from 'react';
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import './index.scss';
 
 import QueryControls from './query-controls';
@@ -94,10 +94,12 @@ function QueryExplorer() {
     }
   }
 
+  const history = useHistory();
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
     if (qr) {
       managerDispatch({type: "select_query", queryRevision: qr});
+      history.push(`/query/${qr.namespace}/${qr.name}/${qr.revision}`);
     }
   }
 

@@ -214,7 +214,7 @@ type QueryControlsProps = {
 }
 
 function QueryControls(props: QueryControlsProps) {
-  const {queries, selectedQuery} = useManagerState()
+  const {queries, selectedQuery} = useManagerState();
   const options = getOptions(queries);
 
   const [showArchiveActions, setShowArchiveActions] = useState(false);
