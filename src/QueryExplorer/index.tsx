@@ -97,10 +97,18 @@ function QueryExplorer() {
   const history = useHistory();
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
-    if (qr) {
-      managerDispatch({type: "select_query", queryRevision: qr});
-      history.push(`/query/${qr.namespace}/${qr.name}/${qr.revision}`);
+    if (!qr) {
+      return
     }
+
+    const currentQueryRevision = managerState.selectedQuery;
+    if (qr.name === currentQueryRevision?.name && qr.namespace === currentQueryRevision?.namespace && qr.revision === currentQueryRevision?.revision) {
+      return
+    }
+
+
+    managerDispatch({type: "select_query", queryRevision: qr});
+    history.push(`/query/${qr.namespace}/${qr.name}/${qr.revision}`);
   }
 
   const queryResult = managerState.queryResult;
