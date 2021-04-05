@@ -56,8 +56,10 @@ function EditableSelect(props: EditableSelectProps) {
   const defaultInputValue = Boolean(queryParams) ? `${defaultOptionLabel}?${queryParams}` : defaultOptionLabel;
   const [inputValue, setInputValue] = useState(defaultInputValue);
 
+  const [reflectParams, setReflectParams] = useState(true);
+
   useEffect(() => {
-    if (!queryParams) {
+    if (!reflectParams) {
       return
     }
 
@@ -70,6 +72,10 @@ function EditableSelect(props: EditableSelectProps) {
   }, [queryParams]);
 
   useEffect(() => {
+    if (!reflectParams) {
+      return
+    }
+
     if (props.selectedQuery) {
       const label = stringifyQueryRevision(props.selectedQuery);
       setOption({ label: label, value: props.selectedQuery});
@@ -129,6 +135,8 @@ function EditableSelect(props: EditableSelectProps) {
       inputValue={inputValue}
       onInputChange={onInputChange}
       onChange={onChange}
+      onFocus={() => setReflectParams(false)}
+      onBlur={() => setReflectParams(true)}
       controlShouldRenderValue={false}
       components={{Input, MenuList}}
       noOptionsMessage={disableNoOptionsMessage}
