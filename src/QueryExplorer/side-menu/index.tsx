@@ -10,6 +10,7 @@ import { MappingsByTenant } from "../../manager.context";
 export type SideMenuModalProps = {
   isOpen: boolean,
   queriesByNamespace: Record<string, Query[]>,
+  archivedQueriesByNamespace: Record<string, Query[]>,
   mappings: MappingsByTenant,
   onClose: () => void,
 }
@@ -22,7 +23,7 @@ function SideMenuModal(props: SideMenuModalProps) {
   const [mode, setMode] = useState<menuMode>('queries');
 
   const modeToComponent: Record<menuMode, JSX.Element> = {
-    'queries': <QueryList onQuerySelection={onClose} queriesByNamespace={props.queriesByNamespace} />,
+    'queries': <QueryList onQuerySelection={onClose} queriesByNamespace={props.queriesByNamespace} archivedQueriesByNamespace={props.archivedQueriesByNamespace} />,
     'resources': <ResourceList mappings={props.mappings} />,
   }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useReducer, useMemo, useCallback } from 'react';
-import { useParams } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import './index.scss';
 
 import QueryControls from './query-controls';
@@ -9,6 +9,7 @@ import ParametersEditor from './params-editor';
 import JsonViewer from 'react-json-view';
 import SaveQueryModal from "./save-query";
 import SideMenuModal from './side-menu';
+import ConfirmationModal from "./confirmation-modal";
 import { parametersReducer, Param, NewParam } from "./parameters";
 import { 
   useManagerState, 
@@ -16,8 +17,11 @@ import {
   runQueryOnRestql,
   saveQueryOnRestql,
   getTenants,
+  ManagerState,
+  archiveSelectedQuery,
+  archiveSelectedRevision,
 } from "../manager.context";
-import { QueryRevision, findQueryRevision } from './queries';
+import { QueryRevision, findQueryRevision, findLastQueryRevision } from './queries';
 
 const debugParamKey = '_debug';
 
@@ -41,11 +45,11 @@ function QueryExplorer() {
 
   const routeParams = useParams<{namespace: string, queryName: string, revision: string}>();
   useEffect(() => {
-    const qr = findQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.queries);
+    const qr = getSelectedOrLastQueryRevision(routeParams.namespace, routeParams.queryName, routeParams.revision, managerState)
     if (!qr) {
       return
     }
-
+    
     managerDispatch({type: "select_query", queryRevision: qr});
   }, [routeParams.namespace, routeParams.queryName, routeParams.revision, managerState.status]);
 
@@ -90,11 +94,21 @@ function QueryExplorer() {
     }
   }
 
+  const history = useHistory();
   const queryControlChangeHandler = (qr: QueryRevision, params: Param[]) => {
     paramsDispatch({type:'replaced', parameters: params});
-    if (qr) {
-      managerDispatch({type: "select_query", queryRevision: qr});
+    if (!qr) {
+      return
     }
+
+    const currentQueryRevision = managerState.selectedQuery;
+    if (qr.name === currentQueryRevision?.name && qr.namespace === currentQueryRevision?.namespace && qr.revision === currentQueryRevision?.revision) {
+      return
+    }
+
+
+    managerDispatch({type: "select_query", queryRevision: qr});
+    history.push(`/query/${qr.namespace}/${qr.name}/${qr.revision}`);
   }
 
   const queryResult = managerState.queryResult;
@@ -148,11 +162,30 @@ function QueryExplorer() {
             disableActions={{
               run: managerState.queryResult.status === 'running',
               save: !managerState.currentQueryText || managerState.queryResult.status === 'running',
+              archive: !managerState.selectedQuery || managerState.selectedQuery?.archived
             }}
             onMenuOpen={openSideMenu}
             onChange={queryControlChangeHandler} 
             onRun={() => runQueryOnRestql(managerDispatch, managerState, params)}
             onSave={openSaveQueryModal}
+            onArchiveQuery={() => managerDispatch({
+              type: 'set_confirmation_modal',
+              state: {
+                status: 'stale',
+                message: "Are you sure you want to archive this query?",
+                opened: true,
+                handler: () => archiveSelectedQuery(managerDispatch, managerState),
+              }
+            })}
+            onArchiveRevision={() => managerDispatch({
+              type: "set_confirmation_modal",
+              state: {
+                status: "stale",
+                message: "Are you sure you want to archive this revision?",
+                opened: true,
+                handler: () => archiveSelectedRevision(managerDispatch, managerState),
+              }
+            })}
           />
         </div>
         <div ref={containerRef} className="query-explorer__input-output--wrapper">
@@ -190,11 +223,49 @@ function QueryExplorer() {
         <SideMenuModal 
           isOpen={sideMenuOpen}
           queriesByNamespace={managerState.queries}
+          archivedQueriesByNamespace={managerState.archivedQueries}
           mappings={managerState.mappings}
           onClose={closeSideMenu}
         />
+        <ConfirmationModal 
+          onConfirm={managerState.confirmationModal.handler}
+          message={managerState.confirmationModal.message}
+          error={managerState.confirmationModal.error}
+          disabled={managerState.confirmationModal.status === 'saving'}
+          isOpen={managerState.confirmationModal.opened}
+          onClose={() => managerDispatch({
+            type: 'set_confirmation_modal', 
+            state: {error: "", opened: false},
+          })}
+        />
     </>
   )
+}
+
+function getSelectedOrLastQueryRevision(namespace: string, queryName: string, revision: string | null, state: ManagerState):  QueryRevision | null {
+    if (revision) {
+      const qr = findQueryRevision(namespace, queryName, revision, state.queries);
+      if (qr) {
+        return qr
+      }
+      
+      const archivedQr = findQueryRevision(namespace, queryName, revision, state.archivedQueries);
+      if (archivedQr) {
+        return archivedQr
+      }
+    }
+    
+    const qr = findLastQueryRevision(namespace, queryName, state.queries);
+    if (qr) {
+      return qr
+    }
+
+    const archivedQr = findLastQueryRevision(namespace, queryName, state.archivedQueries);
+    if (archivedQr) {
+      return archivedQr
+    }
+
+    return null
 }
 
 export default QueryExplorer

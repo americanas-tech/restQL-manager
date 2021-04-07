@@ -1,0 +1,116 @@
+@import 'assets/theme';
+
+.confirmation__modal {
+  background-color: $white;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0px 0px 8px 8px rgba(0, 0, 0, 0.35);
+  margin-top: 10rem;
+}
+
+.confirmation__modal:focus {
+  border: none;
+  outline: none;
+}
+
+.confirmation__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba($color: $black, $alpha: 0.5);
+  z-index: 10;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.confirmation__modal h2 {
+  margin-top: 0;
+  margin-bottom: 1.2rem;
+  color: $black;
+  font-size: 2rem;
+}
+
+.confirmation__modal__actions {
+  display: flex;
+  justify-content: center;
+
+  margin-top: 0.5rem;
+  border-top: solid 1px lighten($color: $gray, $amount: 0.1);
+
+  button {
+    margin: 1.2rem 2rem;
+    padding: 0.8rem 0.5rem;
+    width: 8rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  button:focus {
+    outline: none;
+  }
+}
+
+.confirmation__modal__message,
+.confirmation__modal__error {
+  font-size: 1.2rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.confirmation__modal__message {
+  color: $black;
+}
+
+.confirmation__modal__error {
+  color: $secondary;
+}
+
+.confirmation__modal__actions--primary {
+  border-radius: 6px;
+  border: solid 2px lighten($color: $secondary, $amount: 0.1);
+  background-color: $secondary;
+  color: $white;
+
+  &:hover {
+    background-color: darken($color: $secondary, $amount: 10);
+  }
+}
+
+.confirmation__modal__actions--primary:disabled {
+  cursor: not-allowed;
+  border: none;
+  background-color: rgba($color: $secondary, $alpha: 0.5);
+
+  &:hover {
+    background-color: rgba($color: $secondary, $alpha: 0.5);
+  }
+}
+
+.confirmation__modal__actions--secondary {
+  border-radius: 6px;
+  border: solid 2px lighten($color: $accent, $amount: 0.1);
+  background-color: darken($color: $accent, $amount: 0.9);
+  color: $white;
+
+  &:hover {
+    background-color: darken($color: $accent, $amount: 10);
+  }
+}
+
+.confirmation__modal__actions--secondary:disabled {
+  cursor: not-allowed;
+  border: none;
+  background-color: rgba($color: $accent, $alpha: 0.5);
+
+  &:hover {
+    background-color: rgba($color: $accent, $alpha: 0.5);
+  }
+}
