@@ -223,8 +223,13 @@ type QueryControlsProps = {
 }
 
 function QueryControls(props: QueryControlsProps) {
-  const {queries, selectedQuery} = useManagerState();
-  const options = getOptions(queries);
+  const {queries, archivedQueries, selectedQuery} = useManagerState();
+  let options = getOptions(queries);
+
+  if (selectedQuery?.archived) {
+    const archivedOptions = getOptions(archivedQueries);
+    options = [...options, ...archivedOptions].sort();
+  }
 
   const [showArchiveActions, setShowArchiveActions] = useState(false);
 
