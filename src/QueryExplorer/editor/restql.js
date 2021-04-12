@@ -12,7 +12,7 @@ CodeMirror.defineSimpleMode('restql', {
     { regex: /->/, token: 'keyword' },
     { regex: /\/\/.*/, token: 'comment' },
     {
-      regex: /(?:json|no-multiplex|flatten|base64|no-explode)/,
+      regex: /(?:json|no-multiplex|flatten|base64|no-explode|as-body|as-query)/,
       token: ['builtin'],
     },
     { regex: /cache-control/, token: 'error' },
