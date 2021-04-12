@@ -338,9 +338,16 @@ async function fetchArchivedQueries(namespaces: string[]) {
   
   const queriesByNamespace: Record<string, Query[]> = {};
   for (const namespaceQueries of queriesForNamespace) {
-    if (namespaceQueries.queries.length > 0) {
-      queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
+    if (namespaceQueries.queries.length === 0) {
+      continue
     }
+
+    const queriesWithArchivedRevisions = namespaceQueries.queries.filter(q => q.revisions.length > 0);
+    if (queriesWithArchivedRevisions.length === 0) {
+      continue
+    }
+    
+    queriesByNamespace[namespaceQueries.namespace] = queriesWithArchivedRevisions;
   }
 
   return queriesByNamespace
