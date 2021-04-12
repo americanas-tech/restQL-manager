@@ -15,24 +15,25 @@ function ResourceEditor() {
 
   const tenants = getTenants(managerState.mappings);
 
-  const [mappings, setMappings] = useState<mappings>({});
-  const [selectedTenant, setSelectedTenant] = useState("");
+  const [selectedTenant, setSelectedTenant] = useState(tenants[0]);
+  const [mappings, setMappings] = useState<mappings>(managerState.mappings[selectedTenant]);
   const selectTenant = (tenant: string) => {
     setMappings(managerState.mappings[tenant]);
     setSelectedTenant(tenant);
   }
 
   useEffect(() => {
-    const initialTenant = tenants[0];
-
-    if (initialTenant) {
-      selectTenant(initialTenant);
-    }
+    setMappings(managerState.mappings[selectedTenant])
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managerState.mappings]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [mappingToEdit, setMappingToEdit] = useState({name: '', url: ''});
+
+  const saveHandler = async (tenant: string, name: string, url: string, authCode: string) => {
+    await setResourceOnRestql(managerDispatch, tenant, name, url, authCode);
+    setModalOpen(false);
+  }
 
   return (
     <main className="resource-editor">
@@ -79,7 +80,7 @@ function ResourceEditor() {
         resourceUrl={mappingToEdit.url}
         onClose={() => setModalOpen(false)}
 
-        onSave={(tenant, name, url, authCode) => setResourceOnRestql(managerDispatch, tenant, name, url, authCode)}
+        onSave={saveHandler}
       />
     </main>
   )

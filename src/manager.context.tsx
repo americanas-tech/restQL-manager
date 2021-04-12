@@ -268,7 +268,6 @@ export async function setResourceOnRestql(dispatch: Dispatch, tenant: string, re
 }
 
 export async function archiveSelectedQuery(dispatch: Dispatch, state: ManagerState) {
-  console.log('archiving query')
   dispatch({type: 'set_confirmation_modal', state: {
     status: 'saving'
   }})
