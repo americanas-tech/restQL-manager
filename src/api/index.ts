@@ -1,4 +1,9 @@
 import axios from 'axios';
+import qs from 'qs';
+
+axios.defaults.paramsSerializer = params => {
+  return qs.stringify(params, { arrayFormat: 'repeat' });
+};
 
 const restqlUrl = process.env.REACT_APP_RESTQL_URL;
 const adminUrl = restqlUrl + '/admin';
