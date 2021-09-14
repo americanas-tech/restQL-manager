@@ -326,6 +326,10 @@ async function fetchQueries(namespaces: string[]) {
   
   const queriesByNamespace: Record<string, Query[]> = {};
   for (const namespaceQueries of queriesForNamespace) {
+    if (namespaceQueries.queries.length === 0) {
+      continue
+    }
+    
     queriesByNamespace[namespaceQueries.namespace] = namespaceQueries.queries;
   }
 
