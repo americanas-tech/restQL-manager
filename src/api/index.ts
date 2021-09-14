@@ -107,7 +107,7 @@ export async function saveQuery(namespace: string, name: string, queryText: stri
       },
     });
   } catch (error) {
-    return error.response.data;
+    throw new Error(error.response.data.error);
   }
 }
 
@@ -126,14 +126,29 @@ export async function runQuery(text: string, params: Record<string, any>) {
 
     return response.data
   } catch (error) {
-    return error.response.data;
+    throw new Error(error.response.data.error);
   }
 }
 
-export async function setResource(tenant: string, name: string, url: string, authorizationCode: string) {
+export async function createResource(tenant: string, name: string, url: string) {
   try {
     await axios({
       method: 'POST',
+      baseURL: adminUrl,
+      url: `/tenant/${tenant}/mapping/${name}`,
+      data: {
+        url: url
+      }
+    });
+  } catch (error) {
+    throw new Error(error.response.data.error);
+  }
+}
+
+export async function updateResource(tenant: string, name: string, url: string, authorizationCode: string) {
+  try {
+    await axios({
+      method: 'PUT',
       baseURL: adminUrl,
       url: `/tenant/${tenant}/mapping/${name}`,
       headers: {
@@ -144,7 +159,7 @@ export async function setResource(tenant: string, name: string, url: string, aut
       }
     });
   } catch (error) {
-    return error.response.data;
+    throw new Error(error.response.data.error);
   }
 }
 

@@ -7,7 +7,8 @@ import {
   fetchMappingsFromTenant, 
   runQuery, 
   saveQuery, 
-  setResource, 
+  updateResource,
+  createResource,
   fetchArchivedQueriesFromNamespace,
   archiveQuery, 
   archiveRevision,
@@ -247,15 +248,15 @@ export async function saveQueryOnRestql(dispatch: Dispatch, state: ManagerState,
     
     dispatch({type:'save_query_finished'});
   } catch (error) {
-    dispatch({type:'save_query_failed', error: error});
+    dispatch({type:'save_query_failed', error: error.message});
   }
 }
 
-export async function setResourceOnRestql(dispatch: Dispatch, tenant: string, resourceName: string, resourceUrl: string, authorizationCode: string) {
+export async function createResourceOnRestql(dispatch: Dispatch, tenant: string, resourceName: string, resourceUrl: string) {
   dispatch({type:'set_resource_started'});
 
   try {
-    await setResource(tenant, resourceName, resourceUrl, authorizationCode);
+    await createResource(tenant, resourceName, resourceUrl);
     
     const mappingsByTenant = await fetchMappingsByTenant();
 
@@ -263,7 +264,25 @@ export async function setResourceOnRestql(dispatch: Dispatch, tenant: string, re
     
     dispatch({type:'set_resource_finished'});
   } catch (error) {
-    dispatch({type:'set_resource_failed', error: error});
+    dispatch({type:'set_resource_failed', error: error.message});
+    throw error;
+  }
+}
+
+export async function updateResourceOnRestql(dispatch: Dispatch, tenant: string, resourceName: string, resourceUrl: string, authorizationCode: string) {
+  dispatch({type:'set_resource_started'});
+
+  try {
+    await updateResource(tenant, resourceName, resourceUrl, authorizationCode);
+    
+    const mappingsByTenant = await fetchMappingsByTenant();
+
+    dispatch({type:'refresh_mappings', mappings: mappingsByTenant});
+    
+    dispatch({type:'set_resource_finished'});
+  } catch (error) {
+    dispatch({type:'set_resource_failed', error: error.message});
+    throw error;
   }
 }
 

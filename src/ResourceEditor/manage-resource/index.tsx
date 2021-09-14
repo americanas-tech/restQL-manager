@@ -2,8 +2,12 @@ import { FormEvent, useState, useEffect } from "react";
 import ReactModal from 'react-modal';
 import './index.scss';
 
+export const CreateOperation = 'create';
+export const UpdateOperation = 'update';
+
 export type ManageResourceModalProps = {
   status: 'stale' | 'saving',
+  operation: string, 
   isOpen: boolean,
   tenant: string,
   resourceName: string,
@@ -18,7 +22,7 @@ const inputChangeHandler = (setter: (value: any) => void) => (e: FormEvent<HTMLI
 }
 
 function ManageResourceModal(props: ManageResourceModalProps) {
-  const {status, isOpen, resourceName, resourceUrl, tenant, errorMessage, onSave, onClose} = props;
+  const {status, isOpen, operation, resourceName, resourceUrl, tenant, errorMessage, onSave, onClose} = props;
 
   const [name, setName] = useState(resourceName);
   const [url, setUrl] = useState(resourceUrl);
@@ -68,7 +72,7 @@ function ManageResourceModal(props: ManageResourceModalProps) {
           onChange={inputChangeHandler(setUrl)} 
         />
       </fieldset>
-      <fieldset className="manage-resource__modal__input">
+      {operation == UpdateOperation && <fieldset className="manage-resource__modal__input">
         <label htmlFor="code">Authorization Code</label>
         <input 
           disabled={isSaving} 
@@ -77,7 +81,7 @@ function ManageResourceModal(props: ManageResourceModalProps) {
           value={code} 
           onChange={inputChangeHandler(setCode)} 
         />
-      </fieldset>
+      </fieldset>}
       <div className="manage-resource__modal__actions">
         {errorMessage && <p className="manage-resource__modal__error">{errorMessage}</p>}
         <button 
@@ -88,7 +92,7 @@ function ManageResourceModal(props: ManageResourceModalProps) {
         </button>
         
         <button 
-          disabled={isSaving || !Boolean(name) || !Boolean(url) || !Boolean(code)} 
+          disabled={isSaving || !Boolean(name) || !Boolean(url) || (operation == UpdateOperation && !Boolean(code))} 
           className="manage-resource__modal__actions--primary" 
           onClick={() => onSave(tenant, name, url, code)}>
             Save
