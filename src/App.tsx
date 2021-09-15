@@ -30,7 +30,7 @@ function Scaffold() {
         <Route path="/query/:namespace/:queryName/:revision?">
           <QueryExplorer />
         </Route>
-        <Route patch="/resources">
+        <Route path="/resources">
           <ResourceEditor />
         </Route>
       </Switch>

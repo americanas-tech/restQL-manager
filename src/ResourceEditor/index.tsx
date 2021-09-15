@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 
 import './index.scss';
-import { getTenants, useManagerDispatch, useManagerState, setResourceOnRestql } from "../manager.context";
+import { getTenants, useManagerDispatch, useManagerState, updateResourceOnRestql, createResourceOnRestql } from "../manager.context";
 import { ReactComponent as PencilIcon } from './pencil.svg';
-import ManageResource from './manage-resource';
+import ManageResource, {CreateOperation, UpdateOperation} from './manage-resource';
 
 type mappings = {[resource: string]: {url: string, source: string}};
 
@@ -27,12 +27,38 @@ function ResourceEditor() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [managerState.mappings]);
 
+  const [saveOperation, setSaveOperation] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [mappingToEdit, setMappingToEdit] = useState({name: '', url: ''});
 
   const saveHandler = async (tenant: string, name: string, url: string, authCode: string) => {
-    await setResourceOnRestql(managerDispatch, tenant, name, url, authCode);
-    setModalOpen(false);
+    try {
+      if (saveOperation == CreateOperation) {
+        await createResourceOnRestql(managerDispatch, tenant, name, url);
+      } else if (saveOperation == UpdateOperation) {
+        await updateResourceOnRestql(managerDispatch, tenant, name, url, authCode);
+      }
+  
+      setModalOpen(false);
+    } catch (error) {
+      // let the modal show the error
+    }
+  }
+
+  const openModalForCreate = () => {
+    setSaveOperation(CreateOperation);
+    setModalOpen(true);
+  }
+
+  const openModalForUpdate = (name: string, url: string) => {
+    setSaveOperation(UpdateOperation);
+    setMappingToEdit({name, url});
+    setModalOpen(true);
+  }
+
+  const onModalClose = () => {
+    managerDispatch({type:'set_resource_finished'});
+    setModalOpen(false)
   }
 
   return (
@@ -49,7 +75,7 @@ function ResourceEditor() {
       <section className="resource-editor__mappings">
         <div className="resource-editor__mappings__header">
           <h3>{selectedTenant}</h3>
-          <button onClick={() => setModalOpen(true)} className="resource-editor__mappings__new_resource">New Resource</button>
+          <button onClick={openModalForCreate} className="resource-editor__mappings__new_resource">New Resource</button>
         </div>
         <ul className="resource-editor__mapping-list">
           {Object.keys(mappings).map(resourceName => {
@@ -61,10 +87,7 @@ function ResourceEditor() {
               <ResourceMapping 
                 name={resourceName} 
                 url={mappings[resourceName].url} 
-                onEdit={(name, url) => {
-                  setMappingToEdit({name, url});
-                  setModalOpen(true);
-                }} 
+                onEdit={openModalForUpdate} 
               />
             );
           })}
@@ -75,10 +98,11 @@ function ResourceEditor() {
         errorMessage={managerState.manageResourceModal.error}
         
         isOpen={modalOpen}
+        operation={saveOperation}
         tenant={selectedTenant}
         resourceName={mappingToEdit.name}
         resourceUrl={mappingToEdit.url}
-        onClose={() => setModalOpen(false)}
+        onClose={onModalClose}
 
         onSave={saveHandler}
       />
