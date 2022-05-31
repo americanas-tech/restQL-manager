@@ -10,7 +10,7 @@
     "@types/react": "17.0.39",
     "@types/react-dom": "17.0.0",
     "@uiw/react-codemirror": "3.2.7",
-    "axios": "0.21.3",
+    "axios": "0.21.2",
     "node-sass": "7.0.1",
     "normalize.css": "8.0.1",
     "qs": "6.10.1",
