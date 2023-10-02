@@ -1,8 +1,8 @@
-import CodeMirror from 'codemirror';
-import CodeMirrorEditor from '@uiw/react-codemirror';
-import 'codemirror/keymap/sublime';
-import 'codemirror/theme/eclipse.css';
-import './restql.js';
+import CodeMirrorEditor, { keymap, ViewUpdate } from '@uiw/react-codemirror'
+import { restQL } from './restql'
+import { theme } from './style'
+import { basicSetup } from 'codemirror'
+import { defaultKeymap } from '@codemirror/commands'
 
 type EditorProps = {
   className: string,
@@ -12,45 +12,27 @@ type EditorProps = {
   onChange: (content: string) => void
 }
 
-
 function Editor(props: EditorProps) {
   const { content, onChange, height, width, className } = props
 
   return (
     <div className={className}>
       <CodeMirrorEditor
-        value={content || ""}
-        options={{
-          theme: 'eclipse',
-          keyMap: 'sublime',
-          mode: 'restql',
-          lineWrapping: true,
-        }}
-        height={height}
-        width={width}
-        onChange={(instance: CodeMirror.Editor, changes: CodeMirror.EditorChangeLinkedList[]) => {
-          const linkedChanges = changes as unknown as CodeMirror.EditorChangeLinkedList;
-
-          if (allChangesAreFromInput(linkedChanges)) {
-            onChange(instance.getValue());
-          }
-        }}
+        value={content || ''}
+        height={height.toString() + 'px'}
+        width={width.toString() + 'px'}
+        theme={theme}
+        extensions={[basicSetup, restQL(), keymap.of(defaultKeymap)]}
+        onChange={validateChange}
       />
     </div>
   )
-}
 
-function allChangesAreFromInput(changes: CodeMirror.EditorChangeLinkedList): boolean {
-  let change: CodeMirror.EditorChangeLinkedList | null = changes;
-  do {
-    if (change.origin === "setValue") {
-      return false
+  function validateChange(value: string, viewUpdate: ViewUpdate) {
+    if (viewUpdate.docChanged) {
+      onChange(value)
     }
-
-    change = changes.next || null;
-  } while (change);
-
-  return true
+  }
 }
 
 export default Editor
