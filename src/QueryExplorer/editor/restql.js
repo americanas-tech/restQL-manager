@@ -1,27 +1,132 @@
-import CodeMirror from 'codemirror'
-import 'codemirror/addon/mode/simple'
+import { StreamLanguage } from '@codemirror/language'
 
-CodeMirror.defineSimpleMode('restql', {
-  // The start state contains the rules that are intially used
-  start: [
-    { regex: /"(?:[^\\]|\\.)*?(?:"|$)/, token: 'string' },
-    {
-      regex: /(?:use|from|to|into|update|delete|as|headers|depends-on|with|only|json|no-multiplex|timeout|hidden|ignore-errors)/,
-      token: ['keyword'],
-    },
-    { regex: /->/, token: 'keyword' },
-    { regex: /\/\/.*/, token: 'comment' },
-    {
-      regex: /(?:json|no-multiplex|flatten|base64|no-explode|as-body|as-query)/,
-      token: ['builtin'],
-    },
-    { regex: /cache-control/, token: 'error' },
-    { regex: /true|false|null|undefined/, token: 'atom' },
-    {
-      regex: /0x[a-f\d]+|[-+]?(?:\.\d+|\d+\.?\d*)(?:e[-+]?\d+)?/i,
-      token: 'number',
-    },
-    { regex: /\$[a-zA-Z]+|=\s*[a-zA-Z]+(\.[a-zA-Z]+)+/, token: 'variable-3' },
-    { regex: /[-+/*=<>!]+/, token: 'operator' },
-  ],
-})
+var keywords = {
+  'use': true,
+  'from': true,
+  'to': true,
+  'into': true,
+  'update': true,
+  'delete': true,
+  'as': true,
+  'headers': true,
+  'depends-on': true,
+  'with': true,
+  'only': true,
+  'timeout': true,
+  'hidden': true,
+  'ignore-errors': true,
+  '->': true,
+}
+
+var builtIn = {
+  'json': true,
+  'no-multiplex': true,
+  'flatten': true,
+  'base64': true,
+  'no-explode': true,
+  'as-body': true,
+  'as-query': true,
+}
+
+var atoms = {
+  'true': true, 'false': true, 'null': true, 'undefined': true,
+}
+
+var cacheControl = /cache-control/
+
+function tokenBase(stream, state) {
+  var ch = stream.next()
+  if (ch === '"' || ch === '\'' || ch === '`') {
+    state.tokenize = tokenString(ch)
+    return state.tokenize(stream, state)
+  }
+
+  if (/[\d.]/.test(ch)) {
+    if (ch === '.') {
+      stream.match(/^[0-9]+([eE][\-+]?[0-9]+)?/)
+    } else if (ch === '0') {
+      stream.match(/^[xX][0-9a-fA-F]+/) || stream.match(/^0[0-7]+/)
+    } else {
+      stream.match(/^[0-9]*\.?[0-9]*([eE][\-+]?[0-9]+)?/)
+    }
+    return 'number'
+  }
+
+  if (/[\[\]{}(),;:.]/.test(ch)) {
+    return null
+  }
+
+  if (ch === '/') {
+    if (stream.eat('*')) {
+      state.tokenize = tokenComment
+      return tokenComment(stream, state)
+    }
+    if (stream.eat('/')) {
+      stream.skipToEnd()
+      return 'comment'
+    }
+  }
+
+  stream.eatWhile(/[\w$_\xa1-\uffff\-><]/)
+  var cur = stream.current()
+
+  if (keywords.propertyIsEnumerable(cur)) return 'keyword'
+  if (atoms.propertyIsEnumerable(cur)) return 'atom'
+  if (builtIn.propertyIsEnumerable(cur)) return 'typeName.standard'
+  if (cacheControl.test(cur)) return 'error'
+  if (/\$[a-zA-Z]+|=\s*[a-zA-Z]+(\.[a-zA-Z]+)+/.test(cur)) return 'variable-2'
+
+  return 'variable'
+}
+
+function tokenString(quote) {
+  return function(stream, state) {
+    var escaped = false, next, end = false
+    while ((next = stream.next()) != null) {
+      if (next === quote && !escaped) {
+        end = true
+        break
+      }
+      escaped = !escaped && quote !== '`' && next === '\\'
+    }
+    if (end || !(escaped || quote === '`'))
+      state.tokenize = tokenBase
+    return 'string'
+  }
+}
+
+function tokenComment(stream, state) {
+  let maybeEnd = false, ch
+  while (ch = stream.next()) {
+    if (ch === '/' && maybeEnd) {
+      state.tokenize = tokenBase
+      break
+    }
+    maybeEnd = (ch === '*')
+  }
+  return 'comment'
+}
+
+// Interface
+
+const restQLGrammar = {
+  name: 'restQL',
+  startState: function() {
+    return {
+      tokenize: null,
+    }
+  },
+
+  token: function(stream, state) {
+    if (stream.eatSpace()) return null
+    return tokenBase(stream, state)
+  },
+
+  languageData: {
+    commentTokens: { line: '//', block: { open: '/*', close: '*/' } },
+  },
+}
+
+export function restQL() {
+  return StreamLanguage.define(restQLGrammar)
+}
