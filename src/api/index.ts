@@ -126,7 +126,7 @@ export async function runQuery(text: string, params: Record<string, any>) {
 
     return response.data
   } catch (error) {
-    throw new Error(error.response.data.error);
+    return error.response.data
   }
 }
 
